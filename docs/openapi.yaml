@@ -1,0 +1,392 @@
+openapi: 3.0.3
+info:
+  title: 个人网站后台认证接口
+  version: 0.6.0
+  description: |
+    以下接口已编写实现，尚未运行测试；需要先创建 sys_user 表并插入管理员账号。
+    密码采用 BCrypt（支持可选的 {bcrypt} 前缀），最多72个UTF-8字节，不支持明文密码。
+    采用 HS512 签名 JWT 和服务端登录缓存；登录仅允许 ACTIVE 状态的 ADMIN 用户。
+    后续请求设置 Authorization: Bearer <data.token>，Apifox使用Bearer Token认证。
+    默认登录缓存有效期30分钟，剩余不超过20分钟时请求续期，JWT最长8小时后必须重新登录。
+    时效可在token配置中修改；登录缓存使用Redis，后端重启不主动注销有效登录。
+    Redis连接失败返回503及AUTH_CACHE_UNAVAILABLE，不降级到本机内存认证。
+    账号先去除两端空白，再按不区分大小写查询；密码保留原始输入。
+    所有用户数据均不返回 password_hash。数据库凭据不得用于后台登录。
+    部署时使用 HTTPS，Token不可放入查询参数或日志。
+    浏览器写操作必须校验 Origin 为受信任前端来源。
+    建议前后端同源代理；跨域时需要明确的 CORS 来源及Authorization请求头支持。
+    受保护请求的响应头X-Token-Expires-At及X-Token-Max-Expires-At返回Unix毫秒有效期。
+servers:
+  - url: http://localhost:8080
+    description: 本地开发地址，端口可用 SERVER_PORT 覆盖
+tags:
+  - name: 后台认证
+    description: 管理员JWT认证
+paths:
+  /api/auth/me/password:
+    put:
+      tags: [后台认证]
+      operationId: updateCurrentAdminPassword
+      summary: 修改当前管理员密码
+      description: |
+        需要有效管理员Token及受信任的浏览器Origin。仅修改当前登录用户。
+        当前密码必须正确，新密码至少8个Unicode字符且UTF-8编码不超过72字节。
+        不去除密码空白，确认密码必须与新密码完全一致，新旧密码不得相同。
+        新密码以BCrypt保存。使用旧密码哈希作为更新条件，避免并发修改覆盖。
+        成功后撤销该账号所有缓存中的Token，前端清理Token并重新登录。
+        并发签发的旧密码Token在下一次鉴权时通过密码指纹检查失效。
+        登录时也校验密码哈希是否被并发修改。无须改变数据库表结构。
+        单实例每个用户每5分钟最多20次修改请求。密码和密码哈希不进入操作日志。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordUpdateRequest'
+      responses:
+        '200':
+          description: 密码修改成功，需要使用新密码重新登录
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [code, message, data]
+                properties:
+                  code: {type: string, enum: [OK]}
+                  message: {type: string, example: 密码已修改，请使用新密码重新登录}
+                  data: {type: object, nullable: true, example: null}
+        '400':
+          description: VALIDATION_ERROR 参数错误、CURRENT_PASSWORD_INCORRECT 旧密码错误、PASSWORD_CONFIRM_MISMATCH 确认密码不一致、PASSWORD_UNCHANGED 新旧密码相同
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example: {code: CURRENT_PASSWORD_INCORRECT, message: 当前密码不正确}
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: 校验期间密码已被并发修改，需要重新登录
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example: {code: PASSWORD_CHANGED_RETRY, message: 密码已被修改，请重新登录后重试}
+        '429':
+          description: 修改密码尝试过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example: {code: TOO_MANY_REQUESTS, message: 尝试次数过多，请稍后再试}
+        '503':
+          $ref: '#/components/responses/AuthCacheUnavailable'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/login:
+    post:
+      tags: [后台认证]
+      operationId: login
+      summary: 管理员登录
+      description: |
+        校验密码哈希、账号状态及管理员角色，成功后生成随机登录标识、签发JWT并更新last_login_at。
+        data包含token、tokenType、expiresAt、maxExpiresAt、user，时间为Unix毫秒。
+        JWT只携带用户ID、登录标识、签发者及时间，服务端缓存控制滑动有效期。
+        不存在、密码错误、停用或非管理员统一返回401。
+        单实例内按来源IP限流，每5分钟最多20次登录请求，超限返回429。
+        反向代理和多实例部署需要额外配置网关限流，不读取客户端提供的 X-Forwarded-For。
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            example:
+              username: admin
+              password: example-password-only
+      responses:
+        '200':
+          description: 登录成功，保存data.token作为后续请求的Bearer Token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: 账号或密码错误，或账号不允许登录；不透露具体失败原因
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example: {code: INVALID_CREDENTIALS, message: 账号或密码错误}
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          description: 登录请求过于频繁
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example: {code: TOO_MANY_REQUESTS, message: 尝试次数过多，请稍后再试}
+        '503':
+          $ref: '#/components/responses/AuthCacheUnavailable'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/me:
+    put:
+      tags: [后台认证]
+      operationId: updateCurrentAdmin
+      summary: 修改当前管理员账号信息
+      description: |
+        仅修改当前Token对应的管理员，不能通过请求指定其他用户ID、角色或状态。
+        完整提交 username、nickname、email。昵称和邮箱省略、null或空白均保存为null。
+        所有字段去除两端空白，账号唯一且不区分大小写。邮箱仅作联系信息，不验证邮箱所有权。
+        不修改密码。修改账号后Token仍有效，下次登录使用新账号。
+        浏览器请求需通过 Origin 校验。保存成功返回最新资料，更新时间同步维护。
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+            example: {username: admin, nickname: 曹进龙, email: admin@example.com}
+      responses:
+        '200':
+          description: 保存成功
+          headers:
+            X-Token-Expires-At:
+              $ref: '#/components/headers/TokenExpiresAt'
+            X-Token-Max-Expires-At:
+              $ref: '#/components/headers/TokenMaxExpiresAt'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          description: 登录账号已被其他用户使用（不区分大小写）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example: {code: USERNAME_EXISTS, message: 该登录账号已被使用，请换一个账号}
+        '503':
+          $ref: '#/components/responses/AuthCacheUnavailable'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags: [后台认证]
+      operationId: getCurrentUser
+      summary: 获取当前管理员
+      description: 校验JWT签名、登录缓存、密码指纹及数据库中账号当前状态和角色，停用或权限被撤销后不得继续访问。接近过期时续期，但不得超过JWT绝对截止时间。
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 当前管理员资料
+          headers:
+            X-Token-Expires-At:
+              $ref: '#/components/headers/TokenExpiresAt'
+            X-Token-Max-Expires-At:
+              $ref: '#/components/headers/TokenMaxExpiresAt'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/AuthCacheUnavailable'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/auth/logout:
+    post:
+      tags: [后台认证]
+      operationId: logout
+      summary: 退出登录
+      description: 幂等操作，携带当前Bearer Token以撤销其服务端登录记录；无Token、无效或已过期也返回204。浏览器请求需验证Origin。
+      security:
+        - bearerAuth: []
+        - {}
+      responses:
+        '204':
+          description: 退出成功，无响应体
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '503':
+          $ref: '#/components/responses/AuthCacheUnavailable'
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  headers:
+    TokenExpiresAt:
+      description: 当前服务端登录缓存截止时间，Unix毫秒；仅认证成功后返回，改密成功后Token已撤销，此值不再有效
+      schema: {type: integer, format: int64}
+    TokenMaxExpiresAt:
+      description: JWT最长截止时间，Unix毫秒；续期不能超过此时间
+      schema: {type: integer, format: int64}
+  schemas:
+    LoginResponse:
+      type: object
+      required: [code, message, data]
+      properties:
+        code: {type: string, enum: [OK]}
+        message: {type: string, example: 登录成功}
+        data:
+          type: object
+          required: [token, tokenType, expiresAt, maxExpiresAt, user]
+          properties:
+            token:
+              type: string
+              description: HS512签名JWT，只用于Authorization请求头，不包含密码或用户资料
+            tokenType: {type: string, enum: [Bearer]}
+            expiresAt: {type: integer, format: int64, description: 当前服务端登录有效期截止时间，Unix毫秒}
+            maxExpiresAt: {type: integer, format: int64, description: JWT绝对截止时间，Unix毫秒}
+            user:
+              $ref: '#/components/schemas/User'
+    PasswordUpdateRequest:
+      type: object
+      required: [currentPassword, newPassword, confirmPassword]
+      properties:
+        currentPassword:
+          type: string
+          format: password
+          writeOnly: true
+          minLength: 1
+          maxLength: 72
+          description: 当前密码，UTF-8编码不超过72字节
+        newPassword:
+          type: string
+          format: password
+          writeOnly: true
+          minLength: 8
+          maxLength: 72
+          description: 至少8个Unicode字符，UTF-8编码不超过72字节，不能与旧密码相同
+        confirmPassword:
+          type: string
+          format: password
+          writeOnly: true
+          minLength: 8
+          maxLength: 72
+          description: 必须与新密码完全一致
+    ProfileRequest:
+      type: object
+      required: [username]
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 登录账号，去除两端空白后不能为空，最多100个Java UTF-16代码单元
+        nickname:
+          type: string
+          nullable: true
+          maxLength: 100
+          description: 昵称，去除两端空白后最多100个Java UTF-16代码单元，空白保存为null
+        email:
+          type: string
+          nullable: true
+          maxLength: 254
+          description: 联系邮箱，去除两端空白后校验邮箱格式，空白保存为null
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: 管理员账号；两端去空白后不能为空
+        password:
+          type: string
+          minLength: 1
+          maxLength: 72
+          writeOnly: true
+          format: password
+          description: 登录密码，通过 HTTPS 传输，不记录到日志；UTF-8编码后不得超过72字节（中文字符通常占多个字节）
+    User:
+      type: object
+      required: [id, username, role, status]
+      properties:
+        id:
+          type: string
+          pattern: '^[0-9]+$'
+          description: BIGINT 主键序列化为字符串，避免 JavaScript 精度丢失
+          example: '1'
+        username: {type: string, example: admin}
+        nickname: {type: string, nullable: true, example: 曹进龙}
+        email: {type: string, nullable: true, example: null}
+        role: {type: string, enum: [ADMIN]}
+        status: {type: string, enum: [ACTIVE]}
+        lastLoginAt: {type: string, format: date-time, nullable: true}
+        createdAt: {type: string, format: date-time}
+        updatedAt: {type: string, format: date-time}
+    UserResponse:
+      type: object
+      required: [code, message, data]
+      properties:
+        code: {type: string, enum: [OK]}
+        message: {type: string, example: 操作成功}
+        data:
+          $ref: '#/components/schemas/User'
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code: {type: string, description: 稳定的业务错误码}
+        message: {type: string, description: 面向用户的错误信息，不含 SQL 或堆栈}
+  responses:
+    BadRequest:
+      description: 请求格式错误或参数校验失败
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example: {code: VALIDATION_ERROR, message: 请检查账号和密码}
+    Unauthorized:
+      description: 未携带Bearer Token、签名错误、JWT过期、登录缓存过期或已撤销、密码已变更
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example: {code: UNAUTHENTICATED, message: 请重新登录}
+    Forbidden:
+      description: 无管理员权限、账号停用或请求来源不受信任
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example: {code: FORBIDDEN, message: 无权执行此操作}
+    ServerError:
+      description: 服务内部错误，详细异常仅记录于服务端
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example: {code: INTERNAL_ERROR, message: 服务暂时不可用，请稍后重试}
+    AuthCacheUnavailable:
+      description: Redis登录缓存不可用或数据异常；拒绝鉴权，服务恢复后可重试。改密涉及数据库和Redis两个系统，失败后密码可能已经更新，请重新登录确认。
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example: {code: AUTH_CACHE_UNAVAILABLE, message: 登录缓存服务暂时不可用，请稍后重试}

@@ -1,4 +1,9 @@
 HELP.md
+# 本机开发数据库凭据，不提交到远程仓库。
+**/src/main/resources/application-dev.yml
+logs/
+*.log
+*.log.gz
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
