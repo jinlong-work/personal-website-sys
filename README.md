@@ -17,7 +17,7 @@ personal-website-sys/                 父工程，统一版本与依赖管理
 └── docs/                            接口、架构与日志说明
 ```
 
-无需改表，接口路径保持不变，登录协议已迁移为 Bearer JWT，前后端需同步更新。请在 IDE 中以根目录 `pom.xml` 重新加载 Maven，使用 `personal-website-api` 模块的启动类运行。按要求未运行构建或测试。
+无需改表，接口路径保持不变，登录协议已迁移为 Bearer JWT，前后端需同步更新。请在 IDE 中以根目录 `pom.xml` 重新加载 Maven，使用 `personal-website-api` 模块的启动类运行。发布JAR位于 `release/personal-website-api.jar`，Docker部署及运行配置见 [发布说明](release/README.md)。
 
 ### 启动与打包
 
@@ -36,6 +36,14 @@ personal-website-sys/                 父工程，统一版本与依赖管理
 ./mvnw.cmd -pl personal-website-api -am -DskipTests clean package
 java -jar personal-website-api/target/personal-website-api-0.0.1-SNAPSHOT.jar
 ```
+
+发布时使用 JDK 25 和 `-Prelease` 排除本机dev资源：
+
+```powershell
+.\mvnw.cmd -pl personal-website-api -am -Prelease -DskipTests clean package
+```
+
+该Maven配置不自动选择Spring运行环境，服务器仍需设置 `SPRING_PROFILES_ACTIVE=prod` 并提供连接信息和JWT密钥。`release`目录包含上传服务器使用的JAR、SHA256校验文件与Dockerfile；发布构建跳过测试，不启动服务或执行数据库操作。
 
 ## PostgreSQL 连接
 
