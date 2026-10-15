@@ -1,0 +1,1639 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "个人网站后台认证接口",
+    "version": "1.3.0",
+    "description": "依据现有后端源码核对，共 5 个已实现接口；沿用若依路径和字段命名。登录 Token、用户、角色和权限位于响应顶层，路由数组位于 data。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "登录认证",
+      "description": "验证码、登录、用户与权限、菜单路由及退出。"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "personalWebsite_login",
+        "summary": "用户登录",
+        "description": "Content-Type: application/json，无需Token。\n验证码开启时先调用/captchaImage，使用其uuid及图片答案；关闭时只需username和password。\n密码至少5个字符、UTF-8编码不超过72字节。默认5次密码错误后限制10分钟。\n登录成功后复制顶层token，在后续接口Bearer认证中填入原始Token，工具会拼接Bearer前缀。\n验证码在账号密码校验之前验证并消费；账号密码失败后也要重新获取验证码。\n请求示例中的密码需替换为后台账号密码，code 改为当前图片答案；uuid 使用 {{pw_captcha_uuid}}。成功后后置脚本自动将顶层 token 保存为环境变量 pw_token，后续接口使用 Bearer {{pw_token}}。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              },
+              "examples": {
+                "验证码开启": {
+                  "value": {
+                    "username": "admin",
+                    "password": "REPLACE_WITH_YOUR_PASSWORD",
+                    "code": "6",
+                    "uuid": "12345678123456781234567812345678"
+                  }
+                },
+                "验证码关闭": {
+                  "value": {
+                    "username": "admin",
+                    "password": "REPLACE_WITH_YOUR_PASSWORD"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功，token位于顶层",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "token": "<JWT令牌>"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数或验证码错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        400
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "验证码错误": {
+                    "value": {
+                      "code": 400,
+                      "msg": "验证码错误"
+                    }
+                  },
+                  "验证码已失效": {
+                    "value": {
+                      "code": 400,
+                      "msg": "验证码已失效"
+                    }
+                  },
+                  "用户名和密码不能为空": {
+                    "value": {
+                      "code": 400,
+                      "msg": "用户名和密码不能为空"
+                    }
+                  },
+                  "请求参数不正确": {
+                    "value": {
+                      "code": 400,
+                      "msg": "请求参数不正确"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "用户名、密码或账号状态不满足登录条件",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 401,
+                      "msg": "用户不存在或密码错误"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无访问权限或IP禁止登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "登录 IP 黑名单": {
+                    "value": {
+                      "code": 403,
+                      "msg": "当前IP禁止登录"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "密码重试次数过多，默认限制10分钟",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        429
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 429,
+                      "msg": "密码错误次数过多，请 10 分钟后重试"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PostgreSQL/Redis 不可用；控制器返回数据库或缓存服务暂不可用，认证过滤器/退出返回认证服务暂不可用。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        503
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "数据库或缓存服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "数据库或缓存服务暂不可用"
+                    }
+                  },
+                  "认证服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "认证服务暂不可用"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "未预期的服务内部异常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        500
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 500,
+                      "msg": "系统异常，请稍后重试"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/captchaImage": {
+      "get": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "personalWebsite_getCode",
+        "summary": "获取验证码",
+        "description": "无需Token、无需请求参数。\n返回captchaEnabled=true时，记录uuid，并将img拼接为data:image/jpeg;base64,<img>显示图片。\n数学图片只提交计算答案；字符图片提交图中文字。获取图片不会直接返回答案。\n有效期2分钟，每次登录尝试都会消费验证码；再次尝试必须重新获取。\ncaptchaEnabled=false时省略code和uuid即可登录。\nApifox 后置脚本会保存 pw_captcha_uuid；发送后在响应 Visualize/可视化页查看图片。选真实后端环境，不要用 Mock 图片登录。",
+        "responses": {
+          "200": {
+            "description": "验证码开启或关闭",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptchaResponse"
+                },
+                "examples": {
+                  "验证码开启": {
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "captchaEnabled": true,
+                      "uuid": "12345678123456781234567812345678",
+                      "img": "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAAoAJYDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KK8Z/aV+NXiv4U6Npem+APh9qfxD8da+0sGlWdsoWytWXYDPeSlh5cKmReTgMflLpncJbt8ykrns1FfBf/AATXk8av8XP2kk+ImqQax40i1yxh1O7tWJgaRUnXbHlVwigBVGBgKBX3pVtWUX3Sf3pP9TNSu5Ls2vudgorx39mD9oX/AIaQ8H+Idd/sD/hHf7J1+80P7P8AbftXm+QV/e7vLTbu3fdwcY6mvHv+CnUEviz4P+Cfh1byNHP468Z6ZopZDysZdpGfofulEPTFRdtQcVfm5bekrWf3O5at7138PNf/ALdvdfhY+w6K/MzwX/wTG/ZL8f642l+FPjRq/ibVoUM72Gj+KtJu51RSAzGOO2LBQSATjjI9a+1/jb+1R8K/2aJNFtPiL4pPh2TVI5GsVOn3V15yxbQ5zBE4XG9fvYznjvWj5VFNvV/1/n9wrSu1bbfyPXKK+Vf+Ho/7MX/RTf8Aygap/wDI1av7RWvfEL46fBTwb/woC/uFsPGN9a/bfFlpMllNp2juMyXESzNHKHOVwEXeAGwAcGpd7aLql9/fsur8rsE1ezfRv7u39bn0rRXwn8Yf+Cd/wk+EXwd13xp4Jvtb8C/EDwxpk2p23jddfuVupbiOFyTOWfywJjkP5aJ94gYB2n6R/ZL+JOufF/8AZv8Ah/4w8Sw+Vruq6Ykt22wIJnBK+aFGABIFDgAY+fjimrNSs9Y2v872t9z3SJbacezvb5Wvf713PW6KKKRQUUUUAFFFFABRRRQAUUUUAfFv7Dv/ACc3+1p/2Ndv/KevY/jN8J/jN428Wx6h4A+PH/CtdDW1SJtG/wCEPstV3TBmLS+dM4YbgVG3GBtz3NZf7OX7PfiL4QfGH44+K9ZvdLudO8c63FqWmxWMsjzRRqJciYNGoVvnHClh15r6DqYr93ST3UYL5qKTD/l5VfRyk/k3c/MH9hD4P/HDxV8OPGNx4O/aD/4QWwh8X6lb3Nl/whVjqH2m5Up5lxvlcFN+R+7HC44619Eftdfsz+F/2ofEPwo8EeM/ivZ6Lf6W0t5LoESwR6j4gGxBJJAhlBjwIpTlY5ANzf3a+hfhf8IfCXwZ0fUNL8HaT/Y9hqGoTapcxfaZp/MuZceZJmV2IztHAIA7AV5D+2H+yTP+0dZeHde8L+KbjwP8SfCcktxoWuQbtu5gCYpSpDKrMq/OuSuW+VwSpXwxpKSvy8l9t0krpPSyeqW1tldJDinebTs3zW/7ebtfzto3unrfdnzj+2R+wN8KfgR8ENV+KPwshvfht4x8HNFqdpqFrq1zMJ3EiKIz58r7WJb5ShU7iAdwOK7f49fGm+1H4X/BjxLqf7Kw/aA1LxD4eTUblhpf2saPLJFA7xj/AEKfZ5hcnHyf6voccYSfsQ/tF/HzWNL039pH4y6Xr/w/064W9fQvC0IhbUJARiOUpbW4VePvHzCOQoUtuH37Z2kGn2kFrbRJb20CLFFFGu1URRgKAOgAAGKtJqD5nu00t7WTT9L3Wi/lv1J93mTS1Sab76pr1trq/wCa3Q/LH/hdn/WMv/y2v/vRX6OfA/Uv7Y+EPhG9/wCEN/4V55+mwyf8Ip5Pk/2Vlf8Aj32eXHt29MbF+gruKKq+lhW1ufB/j/Rb/wDbm/a08Y/CnX9XudL+D3w0+w3Gp6JYOYpdfvZF8xVmkHzLEpDDA5+TK4Zgyfc2maZZ6Lptrp+n2sNlYWkSwW9tboEjijUAKiqOAAAAAOmK8v8AhT4c+L+k/FD4i33jzxVpGteB765jbwppljEq3Gnwhn3rMRbxkkgx9Xk+6eR39aqYaUoRXa77tve/n0trZKyKmr1ZPtovTTb13e12FFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9k="
+                    }
+                  },
+                  "验证码关闭": {
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "captchaEnabled": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PostgreSQL/Redis 不可用；控制器返回数据库或缓存服务暂不可用，认证过滤器/退出返回认证服务暂不可用。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        503
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "数据库或缓存服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "数据库或缓存服务暂不可用"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "未预期的服务内部异常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        500
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 500,
+                      "msg": "系统异常，请稍后重试"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/getInfo": {
+      "get": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "personalWebsite_getInfo",
+        "summary": "获取当前用户与权限",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "当前用户、角色、权限和密码提醒配置",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfoResponse"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "user": {
+                        "userId": 1,
+                        "deptId": 100,
+                        "userName": "admin",
+                        "nickName": "管理员",
+                        "admin": true,
+                        "email": "",
+                        "phonenumber": "",
+                        "sex": "2",
+                        "avatar": "",
+                        "status": "0",
+                        "delFlag": "0"
+                      },
+                      "roles": [
+                        "admin"
+                      ],
+                      "permissions": [
+                        "*:*:*"
+                      ],
+                      "pwdChrtype": "0",
+                      "isDefaultModifyPwd": false,
+                      "isPasswordExpired": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "请先登录：未携带 Token、Token 无效/过期、已退出或账号状态变化。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "未登录或会话失效": {
+                    "value": {
+                      "code": 401,
+                      "msg": "请先登录"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PostgreSQL/Redis 不可用；控制器返回数据库或缓存服务暂不可用，认证过滤器/退出返回认证服务暂不可用。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        503
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "数据库或缓存服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "数据库或缓存服务暂不可用"
+                    }
+                  },
+                  "认证服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "认证服务暂不可用"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "未预期的服务内部异常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        500
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 500,
+                      "msg": "系统异常，请稍后重试"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无访问权限或IP禁止登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 403,
+                      "msg": "没有访问权限"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "description": "无需请求参数。需要有效Bearer Token；用户密码哈希不会出现在响应中。角色或权限集合无固定顺序。\n已配置 Bearer {{pw_token}}。返回 pwdChrtype、isDefaultModifyPwd、isPasswordExpired。user.roles 是角色对象数组；顶层 roles 是角色标识字符串数组。"
+      }
+    },
+    "/getRouters": {
+      "get": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "personalWebsite_getRouters",
+        "summary": "获取菜单路由",
+        "description": "无需请求参数，需要有效Bearer Token。初始化脚本没有预置演示菜单，因此初次测试data=[]属于正常结果。\n已配置 Bearer {{pw_token}}。data 是递归 RouterVo 数组，children 同结构；空属性可能省略，query 是 JSON 字符串。",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "路由数组；已配置菜单时返回树形结构",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutersResponse"
+                },
+                "examples": {
+                  "未配置菜单": {
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "data": []
+                    }
+                  },
+                  "配置菜单后的示意树": {
+                    "summary": "仅展示结构，初始化 SQL 不创建该菜单。",
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "data": [
+                        {
+                          "name": "System",
+                          "path": "/system",
+                          "hidden": false,
+                          "redirect": "noRedirect",
+                          "component": "Layout",
+                          "alwaysShow": true,
+                          "meta": {
+                            "title": "系统管理",
+                            "icon": "system",
+                            "noCache": false,
+                            "link": null
+                          },
+                          "children": [
+                            {
+                              "name": "User",
+                              "path": "user",
+                              "hidden": false,
+                              "component": "system/user/index",
+                              "meta": {
+                                "title": "用户管理",
+                                "icon": "user",
+                                "noCache": false,
+                                "link": null
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "请先登录：未携带 Token、Token 无效/过期、已退出或账号状态变化。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        401
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "未登录或会话失效": {
+                    "value": {
+                      "code": 401,
+                      "msg": "请先登录"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PostgreSQL/Redis 不可用；控制器返回数据库或缓存服务暂不可用，认证过滤器/退出返回认证服务暂不可用。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        503
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "数据库或缓存服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "数据库或缓存服务暂不可用"
+                    }
+                  },
+                  "认证服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "认证服务暂不可用"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "未预期的服务内部异常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        500
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 500,
+                      "msg": "系统异常，请稍后重试"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "无访问权限或IP禁止登录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        403
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 403,
+                      "msg": "没有访问权限"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "personalWebsite_logout",
+        "summary": "退出当前会话",
+        "description": "仅支持POST，无请求体。\n要撤销当前会话必须携带登录返回的Bearer Token。成功后再次使用同一个Token调用/getInfo应返回401。\n没有Token或Token已失效时也返回200，但不会撤销其他会话；只退出当前会话。\n已配置 Bearer {{pw_token}}。为便于验证退出后 401，环境变量 pw_token 会保留原值；再次调用 /getInfo 应失败。HTTP 200 表示请求完成，仅携带有效 Token 才实际撤销会话。",
+        "security": [
+          {},
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "退出成功，无Token或已退出时仍返回成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 200,
+                      "msg": "退出成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "PostgreSQL/Redis 不可用；控制器返回数据库或缓存服务暂不可用，认证过滤器/退出返回认证服务暂不可用。",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        503
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "认证服务暂不可用": {
+                    "value": {
+                      "code": 503,
+                      "msg": "认证服务暂不可用"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "未预期的服务内部异常",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "成功200，失败对应HTTP状态码",
+                      "example": 200,
+                      "enum": [
+                        500
+                      ]
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "操作成功"
+                    }
+                  },
+                  "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+                },
+                "examples": {
+                  "示例": {
+                    "value": {
+                      "code": 500,
+                      "msg": "系统异常，请稍后重试"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AjaxResult": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "业务状态码；成功为 200，失败与 HTTP 状态码一致。",
+            "example": 200,
+            "enum": [
+              200
+            ]
+          },
+          "msg": {
+            "type": "string",
+            "example": "操作成功"
+          }
+        },
+        "description": "若依响应：code 为整数，msg 为说明；HTTP 状态码与 code 对应。成功时按接口增加顶层字段。"
+      },
+      "SysRole": {
+        "type": "object",
+        "description": "SysRole 角色对象；区别于 getInfo 顶层的 roles 字符串集合。",
+        "properties": {
+          "createBy": {
+            "type": "string",
+            "description": "创建人",
+            "nullable": true
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "description": "更新人",
+            "nullable": true
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "remark": {
+            "type": "string",
+            "description": "备注",
+            "nullable": true
+          },
+          "params": {
+            "type": "object",
+            "description": "若依附加参数；为空时省略。",
+            "additionalProperties": true
+          },
+          "roleId": {
+            "type": "integer",
+            "description": "角色 ID",
+            "nullable": true,
+            "format": "int64"
+          },
+          "roleName": {
+            "type": "string",
+            "description": "角色名称",
+            "nullable": true
+          },
+          "roleKey": {
+            "type": "string",
+            "description": "角色权限字符，如 admin",
+            "nullable": true
+          },
+          "roleSort": {
+            "type": "integer",
+            "description": "显示顺序",
+            "nullable": true
+          },
+          "dataScope": {
+            "type": "string",
+            "description": "数据范围：1全部、2自定义、3本部门、4本部门及以下、5本人",
+            "nullable": true
+          },
+          "menuCheckStrictly": {
+            "type": "boolean",
+            "description": "菜单树选择是否关联显示"
+          },
+          "deptCheckStrictly": {
+            "type": "boolean",
+            "description": "部门树选择是否关联显示"
+          },
+          "status": {
+            "type": "string",
+            "description": "0正常、1停用",
+            "nullable": true
+          },
+          "delFlag": {
+            "type": "string",
+            "description": "0存在、2删除",
+            "nullable": true
+          },
+          "flag": {
+            "type": "boolean",
+            "description": "用户是否关联此角色的辅助标记"
+          },
+          "admin": {
+            "type": "boolean",
+            "description": "角色 ID 为 1 时为 true"
+          },
+          "menuIds": {
+            "type": "array",
+            "description": "菜单 ID 辅助字段，可能为 null",
+            "nullable": true,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "deptIds": {
+            "type": "array",
+            "description": "数据权限部门 ID 辅助字段，可能为 null",
+            "nullable": true,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "description": "角色权限辅助集合，可能为 null",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "SysDept": {
+        "type": "object",
+        "description": "SysDept 部门对象。未查询的辅助字段可为 null，children 默认空数组。",
+        "properties": {
+          "createBy": {
+            "type": "string",
+            "description": "创建人",
+            "nullable": true
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "description": "更新人",
+            "nullable": true
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "remark": {
+            "type": "string",
+            "description": "备注",
+            "nullable": true
+          },
+          "params": {
+            "type": "object",
+            "description": "若依附加参数；为空时省略。",
+            "additionalProperties": true
+          },
+          "deptId": {
+            "type": "integer",
+            "description": "部门 ID",
+            "nullable": true,
+            "format": "int64"
+          },
+          "parentId": {
+            "type": "integer",
+            "description": "父部门 ID",
+            "nullable": true,
+            "format": "int64"
+          },
+          "ancestors": {
+            "type": "string",
+            "description": "祖级部门 ID 列表，以逗号分隔",
+            "nullable": true
+          },
+          "deptName": {
+            "type": "string",
+            "description": "部门名称",
+            "nullable": true
+          },
+          "orderNum": {
+            "type": "integer",
+            "description": "显示顺序",
+            "nullable": true
+          },
+          "leader": {
+            "type": "string",
+            "description": "负责人",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "description": "联系电话",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "0正常、1停用",
+            "nullable": true
+          },
+          "delFlag": {
+            "type": "string",
+            "description": "0存在、2删除",
+            "nullable": true
+          },
+          "parentName": {
+            "type": "string",
+            "description": "父部门名称辅助字段",
+            "nullable": true
+          },
+          "children": {
+            "type": "array",
+            "description": "子部门，递归结构。",
+            "items": {
+              "$ref": "#/components/schemas/SysDept"
+            }
+          }
+        },
+        "additionalProperties": true
+      },
+      "LoginBody": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "admin",
+            "description": "登录账号，2～100个字符，大小写不敏感，不允许两端空白。"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 5,
+            "description": "后台账号密码；至少 5 个 Java 字符，UTF-8 不超过 72 字节，不去除首尾空格。不是 PostgreSQL 连接密码。"
+          },
+          "code": {
+            "type": "string",
+            "description": "开启验证码时必填",
+            "example": "6"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "开启验证码时必填，来自captchaImage",
+            "example": "12345678123456781234567812345678",
+            "pattern": "^[a-fA-F0-9]{32}$"
+          }
+        },
+        "description": "验证码开关为true时code与uuid必填，为false时可省略；密码不进行trim处理。"
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg",
+          "token"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "成功200，失败对应HTTP状态码",
+            "example": 200,
+            "enum": [
+              200
+            ]
+          },
+          "msg": {
+            "type": "string",
+            "example": "操作成功"
+          },
+          "token": {
+            "type": "string",
+            "description": "JWT令牌，取顶层token，不是data.token。"
+          }
+        },
+        "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+      },
+      "CaptchaResponse": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg",
+          "captchaEnabled"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "成功200，失败对应HTTP状态码",
+            "example": 200,
+            "enum": [
+              200
+            ]
+          },
+          "msg": {
+            "type": "string",
+            "example": "操作成功"
+          },
+          "captchaEnabled": {
+            "type": "boolean",
+            "description": "验证码开关。false 时响应不包含 uuid 和 img，登录可省略 code/uuid。"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "本次验证码标识，登录时原样提交。",
+            "pattern": "^[a-fA-F0-9]{32}$"
+          },
+          "img": {
+            "type": "string",
+            "description": "JPEG 图片的 Base64 字符串，无 data URL 前缀。前端使用 data:image/jpeg;base64, + img；验证码关闭时省略。"
+          }
+        },
+        "description": "验证码启用时才有 uuid/img；只要求 code、msg、captchaEnabled，避免将关闭验证码的成功响应误判。"
+      },
+      "UserInfoResponse": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg",
+          "user",
+          "roles",
+          "permissions",
+          "pwdChrtype",
+          "isDefaultModifyPwd",
+          "isPasswordExpired"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "成功200，失败对应HTTP状态码",
+            "example": 200,
+            "enum": [
+              200
+            ]
+          },
+          "msg": {
+            "type": "string",
+            "example": "操作成功"
+          },
+          "user": {
+            "$ref": "#/components/schemas/SysUserResponse"
+          },
+          "roles": {
+            "type": "array",
+            "description": "角色标识集合；超级管理员为admin。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "description": "权限标识集合；超级管理员为*:*:*。",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pwdChrtype": {
+            "type": "string",
+            "description": "密码字符规则配置，默认0。"
+          },
+          "isDefaultModifyPwd": {
+            "type": "boolean",
+            "description": "是否提醒修改初始密码。"
+          },
+          "isPasswordExpired": {
+            "type": "boolean",
+            "description": "是否触发密码过期提醒；当前接口仅返回提醒状态。"
+          }
+        },
+        "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+      },
+      "RoutersResponse": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg",
+          "data"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "成功200，失败对应HTTP状态码",
+            "example": 200,
+            "enum": [
+              200
+            ]
+          },
+          "msg": {
+            "type": "string",
+            "example": "操作成功"
+          },
+          "data": {
+            "type": "array",
+            "description": "已授权菜单树；没有菜单时为空数组。",
+            "items": {
+              "$ref": "#/components/schemas/RouterVo"
+            }
+          }
+        },
+        "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+      },
+      "SysUserResponse": {
+        "type": "object",
+        "description": "当前用户资料，禁止返回password或password_hash。部分未设置字段为null。",
+        "properties": {
+          "userName": {
+            "type": "string",
+            "description": "登录账号",
+            "nullable": true
+          },
+          "nickName": {
+            "type": "string",
+            "description": "昵称",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱",
+            "nullable": true
+          },
+          "phonenumber": {
+            "type": "string",
+            "description": "手机号",
+            "nullable": true
+          },
+          "sex": {
+            "type": "string",
+            "description": "性别：0男、1女、2未知",
+            "nullable": true
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像地址",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：0正常、1停用",
+            "nullable": true
+          },
+          "delFlag": {
+            "type": "string",
+            "description": "删除标记：0存在、2删除",
+            "nullable": true
+          },
+          "loginIp": {
+            "type": "string",
+            "description": "最后登录IP",
+            "nullable": true
+          },
+          "loginDate": {
+            "type": "string",
+            "description": "最后登录时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "description": "创建人",
+            "nullable": true
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "description": "更新人",
+            "nullable": true
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "remark": {
+            "type": "string",
+            "description": "备注",
+            "nullable": true
+          },
+          "userId": {
+            "type": "integer",
+            "description": "用户ID",
+            "format": "int64",
+            "nullable": true
+          },
+          "deptId": {
+            "type": "integer",
+            "description": "部门ID",
+            "format": "int64",
+            "nullable": true
+          },
+          "roleId": {
+            "type": "integer",
+            "description": "角色查询辅助字段，可能为null",
+            "format": "int64",
+            "nullable": true
+          },
+          "admin": {
+            "type": "boolean",
+            "description": "是否超级管理员；沿用若依用户ID=1的规则。"
+          },
+          "pwdUpdateDate": {
+            "description": "密码更新时间，使用 Jackson 默认日期格式，未设置时为 null。",
+            "nullable": true,
+            "type": "string"
+          },
+          "dept": {
+            "nullable": true,
+            "description": "所属部门；未关联部门时为 null。",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SysDept"
+              }
+            ]
+          },
+          "roles": {
+            "type": "array",
+            "description": "用户已关联的角色对象。",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/SysRole"
+            }
+          },
+          "roleIds": {
+            "type": "array",
+            "description": "角色ID辅助字段，可能为null。",
+            "nullable": true,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "postIds": {
+            "type": "array",
+            "description": "岗位ID辅助字段，可能为null。",
+            "nullable": true,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "params": {
+            "type": "object",
+            "description": "若依附加参数；为空时省略。",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "RouterVo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean",
+            "description": "true 时在侧边栏隐藏。"
+          },
+          "redirect": {
+            "type": "string",
+            "nullable": true,
+            "description": "重定向地址；noRedirect 表示面包屑不可点击。"
+          },
+          "component": {
+            "type": "string",
+            "nullable": true,
+            "description": "前端组件路径，或 Layout、ParentView、InnerLink 等若依组件标识。"
+          },
+          "query": {
+            "type": "string",
+            "nullable": true,
+            "description": "序列化的 JSON 字符串，如 {\"id\":1}，不是对象。"
+          },
+          "alwaysShow": {
+            "type": "boolean",
+            "description": "是否一直显示目录节点；未设置时可能省略。"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaVo"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RouterVo"
+            }
+          }
+        },
+        "description": "若依菜单路由对象。空字符串、空集合和null属性通常省略；query为字符串，不是JSON对象。"
+      },
+      "MetaVo": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "菜单展示名称",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "description": "图标标识",
+            "nullable": true
+          },
+          "noCache": {
+            "type": "boolean",
+            "description": "true表示不缓存页面"
+          },
+          "link": {
+            "type": "string",
+            "description": "外部链接地址，无链接时可能为null",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "登录响应顶层 token，Authorization: Bearer <token>。"
+      }
+    }
+  }
+}

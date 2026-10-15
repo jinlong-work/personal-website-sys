@@ -15,47 +15,93 @@
     <name>personal-website-sys</name>
     <description>个人网站后端父工程</description>
     <modules>
+        <module>personal-website-admin</module>
         <module>personal-website-common</module>
         <module>personal-website-framework</module>
-        <module>personal-website-admin</module>
-        <module>personal-website-modules</module>
-        <module>personal-website-api</module>
+        <module>personal-website-system</module>
     </modules>
     <properties>
         <java.version>25</java.version>
         <mybatis-plus.version>3.5.17</mybatis-plus.version>
-        <jjwt.version>0.13.0</jjwt.version>
+        <commons.io.version>2.22.0</commons.io.version>
+        <jwt.version>0.13.0</jwt.version>
+        <fastjson.version>2.0.64</fastjson.version>
+        <druid.version>1.2.28</druid.version>
+        <kaptcha.version>2.3.3</kaptcha.version>
+        <oshi.version>7.4.4</oshi.version>
+        <minio.version>9.0.3</minio.version>
+        <okhttp.version>5.3.2</okhttp.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.jinlong</groupId>
-                <artifactId>personal-website-common</artifactId>
-                <version>${project.version}</version>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jinlong</groupId>
-                <artifactId>personal-website-framework</artifactId>
-                <version>${project.version}</version>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp-jvm</artifactId>
+                <version>${okhttp.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.jinlong</groupId>
                 <artifactId>personal-website-admin</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <!-- io常用工具类 -->
             <dependency>
-                <groupId>com.jinlong</groupId>
-                <artifactId>personal-website-ai</artifactId>
-                <version>${project.version}</version>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+
+            <!-- 阿里JSON解析器 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jwt.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jinlong</groupId>
-                <artifactId>personal-website-map</artifactId>
-                <version>${project.version}</version>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <!-- framework 使用的第三方依赖统一管理版本 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-4-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>pro.fessional</groupId>
+                <artifactId>kaptcha</artifactId>
+                <version>${kaptcha.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-jsqlparser</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
         </dependencies>
@@ -79,4 +125,17 @@
             </plugins>
         </pluginManagement>
     </build>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <excludes><exclude>application-dev.yml</exclude></excludes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
 </project>

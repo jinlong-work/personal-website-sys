@@ -1,0 +1,899 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "个人网站若依登录接口",
+    "version": "1.1.0",
+    "description": "个人网站后台当前登录接口，适用于 Apifox 的 OpenAPI 3.0 文件导入。\n\n测试前：启动后台，并在业务 PostgreSQL 执行 sql/003_ruoyi_login_postgresql.sql；没有管理员时修改初始密码后执行 sql/004_ruoyi_initial_admin_postgresql.sql。\n\n测试顺序：GET /captchaImage → POST /login → GET /getInfo → GET /getRouters → POST /logout。\n默认地址 http://localhost:8080，若端口或部署地址不同，在 Apifox 环境的服务地址中修改。\n\n登录成功读取响应顶层 token；受保护接口使用 Authorization: Bearer <token>。\n所有响应为 JSON，成功使用数字 code=200 与 msg；失败的 HTTP 状态码与 code 一致。\n验证码默认开启，数学验证码提交计算结果，字符验证码提交图中文字；图片有效期2分钟，使用一次后消费，失败后也应重新获取。\n默认会话30分钟，在剩余20分钟内访问时续期，最长8小时需重新登录。退出后原 Token 即刻失效。\n文档中的账号密码、uuid、img和Token示例均为占位值，测试时使用实际值。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "本机开发地址；部署后修改为实际后台服务地址"
+    }
+  ],
+  "tags": [
+    {
+      "name": "登录认证"
+    }
+  ],
+  "paths": {
+    "/captchaImage": {
+      "get": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "getCode",
+        "summary": "获取验证码",
+        "description": "无需Token、无需请求参数。\n返回captchaEnabled=true时，记录uuid，并将img拼接为data:image/jpeg;base64,<img>显示图片。\n数学图片只提交计算答案；字符图片提交图中文字。获取图片不会直接返回答案。\n有效期2分钟，每次登录尝试都会消费验证码；再次尝试必须重新获取。\ncaptchaEnabled=false时省略code和uuid即可登录。",
+        "responses": {
+          "200": {
+            "description": "验证码开启或关闭",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptchaResponse"
+                },
+                "examples": {
+                  "enabled": {
+                    "summary": "验证码开启（img为占位值）",
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "captchaEnabled": true,
+                      "uuid": "12345678123456781234567812345678",
+                      "img": "<Base64 JPEG图片>"
+                    }
+                  },
+                  "disabled": {
+                    "summary": "验证码关闭",
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "captchaEnabled": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": []
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "login",
+        "summary": "用户登录",
+        "description": "Content-Type: application/json，无需Token。\n验证码开启时先调用/captchaImage，使用其uuid及图片答案；关闭时只需username和password。\n密码至少5个字符、UTF-8编码不超过72字节。默认5次密码错误后限制10分钟。\n登录成功后复制顶层token，在后续接口Bearer认证中填入原始Token，工具会拼接Bearer前缀。\n验证码在账号密码校验之前验证并消费；账号密码失败后也要重新获取验证码。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginBody"
+              },
+              "examples": {
+                "captchaEnabled": {
+                  "summary": "验证码开启，请替换实际密码、答案和uuid",
+                  "value": {
+                    "username": "admin",
+                    "password": "REPLACE_WITH_YOUR_PASSWORD",
+                    "code": "6",
+                    "uuid": "12345678123456781234567812345678"
+                  }
+                },
+                "captchaDisabled": {
+                  "summary": "验证码关闭",
+                  "value": {
+                    "username": "admin",
+                    "password": "REPLACE_WITH_YOUR_PASSWORD"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功，token位于顶层",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "成功响应（Token为占位值）",
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "token": "<JWT令牌>"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数或验证码错误",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult"
+                },
+                "examples": {
+                  "captchaError": {
+                    "summary": "答案错误或未填写code",
+                    "value": {
+                      "code": 400,
+                      "msg": "验证码错误"
+                    }
+                  },
+                  "captchaExpired": {
+                    "summary": "uuid缺失、错误、过期或已消费",
+                    "value": {
+                      "code": 400,
+                      "msg": "验证码已失效"
+                    }
+                  },
+                  "emptyCredentials": {
+                    "summary": "用户名或密码为空，且验证码校验已通过",
+                    "value": {
+                      "code": 400,
+                      "msg": "用户名和密码不能为空"
+                    }
+                  },
+                  "invalidJson": {
+                    "summary": "JSON格式或请求体不正确",
+                    "value": {
+                      "code": 400,
+                      "msg": "请求参数不正确"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "用户名、密码或账号状态不满足登录条件",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult"
+                },
+                "examples": {
+                  "badCredentials": {
+                    "summary": "统一登录失败提示",
+                    "value": {
+                      "code": 401,
+                      "msg": "用户不存在或密码错误"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        },
+        "security": []
+      }
+    },
+    "/getInfo": {
+      "get": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "getInfo",
+        "summary": "获取当前用户与权限",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "当前用户、角色、权限和密码提醒配置",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInfoResponse"
+                },
+                "examples": {
+                  "admin": {
+                    "summary": "管理员响应，展示常用字段",
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "user": {
+                        "userId": 1,
+                        "deptId": 100,
+                        "userName": "admin",
+                        "nickName": "管理员",
+                        "admin": true,
+                        "email": "",
+                        "phonenumber": "",
+                        "sex": "2",
+                        "avatar": "",
+                        "status": "0",
+                        "delFlag": "0"
+                      },
+                      "roles": [
+                        "admin"
+                      ],
+                      "permissions": [
+                        "*:*:*"
+                      ],
+                      "pwdChrtype": "0",
+                      "isDefaultModifyPwd": false,
+                      "isPasswordExpired": false
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "description": "无需请求参数。需要有效Bearer Token；用户密码哈希不会出现在响应中。角色或权限集合无固定顺序。"
+      }
+    },
+    "/getRouters": {
+      "get": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "getRouters",
+        "summary": "获取菜单路由",
+        "description": "无需请求参数，需要有效Bearer Token。初始化脚本没有预置演示菜单，因此初次测试data=[]属于正常结果。",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "路由数组；已配置菜单时返回树形结构",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoutersResponse"
+                },
+                "examples": {
+                  "empty": {
+                    "summary": "未配置菜单",
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "data": []
+                    }
+                  },
+                  "configured": {
+                    "summary": "已配置菜单的结构示例，不代表已创建该菜单",
+                    "value": {
+                      "code": 200,
+                      "msg": "操作成功",
+                      "data": [
+                        {
+                          "name": "Articles",
+                          "path": "/articles",
+                          "hidden": false,
+                          "component": "Layout",
+                          "children": [
+                            {
+                              "name": "ArticlesList",
+                              "path": "list",
+                              "hidden": false,
+                              "component": "articles/index",
+                              "meta": {
+                                "title": "文章",
+                                "icon": "document",
+                                "noCache": false,
+                                "link": null
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "登录认证"
+        ],
+        "operationId": "logout",
+        "summary": "退出当前会话",
+        "description": "仅支持POST，无请求体。\n要撤销当前会话必须携带登录返回的Bearer Token。成功后再次使用同一个Token调用/getInfo应返回401。\n没有Token或Token已失效时也返回200，但不会撤销其他会话；只退出当前会话。",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "退出成功，无Token或已退出时仍返回成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AjaxResult"
+                },
+                "examples": {
+                  "success": {
+                    "summary": "成功响应",
+                    "value": {
+                      "code": 200,
+                      "msg": "退出成功"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "$ref": "#/components/responses/Unavailable"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "AjaxResult": {
+        "type": "object",
+        "required": [
+          "code",
+          "msg"
+        ],
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "成功200，失败对应HTTP状态码",
+            "example": 200
+          },
+          "msg": {
+            "type": "string",
+            "example": "操作成功"
+          }
+        },
+        "description": "若依通用响应。登录Token、当前用户和权限字段位于顶层；路由数组位于data。"
+      },
+      "LoginBody": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100,
+            "example": "admin",
+            "description": "登录账号，2～100个字符，大小写不敏感，不允许两端空白。"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "minLength": 5,
+            "description": "最多72个UTF-8字节"
+          },
+          "code": {
+            "type": "string",
+            "description": "开启验证码时必填",
+            "example": "6"
+          },
+          "uuid": {
+            "type": "string",
+            "description": "开启验证码时必填，来自captchaImage",
+            "example": "12345678123456781234567812345678",
+            "pattern": "^[a-fA-F0-9]{32}$"
+          }
+        },
+        "description": "验证码开关为true时code与uuid必填，为false时可省略；密码不进行trim处理。"
+      },
+      "RouterVo": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "redirect": {
+            "type": "string",
+            "nullable": true
+          },
+          "component": {
+            "type": "string",
+            "nullable": true
+          },
+          "query": {
+            "type": "string",
+            "nullable": true
+          },
+          "alwaysShow": {
+            "type": "boolean"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaVo"
+          },
+          "children": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RouterVo"
+            }
+          }
+        },
+        "description": "若依菜单路由对象。空字符串、空集合和null属性通常省略；query为字符串，不是JSON对象。"
+      },
+      "CaptchaResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AjaxResult"
+          },
+          {
+            "type": "object",
+            "required": [
+              "captchaEnabled"
+            ],
+            "properties": {
+              "captchaEnabled": {
+                "type": "boolean",
+                "description": "验证码是否开启；false时不返回uuid和img。"
+              },
+              "uuid": {
+                "type": "string",
+                "description": "本次验证码标识，登录时原样提交。"
+              },
+              "img": {
+                "type": "string",
+                "description": "JPEG图片的Base64文本，没有data:前缀；可拼接data:image/jpeg;base64,后在浏览器中显示。"
+              }
+            }
+          }
+        ]
+      },
+      "LoginResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AjaxResult"
+          },
+          {
+            "type": "object",
+            "required": [
+              "token"
+            ],
+            "properties": {
+              "token": {
+                "type": "string",
+                "description": "JWT令牌，取顶层token，不是data.token。"
+              }
+            }
+          }
+        ]
+      },
+      "SysUserResponse": {
+        "type": "object",
+        "description": "当前用户资料，禁止返回password或password_hash。部分未设置字段为null。",
+        "properties": {
+          "userName": {
+            "type": "string",
+            "description": "登录账号",
+            "nullable": true
+          },
+          "nickName": {
+            "type": "string",
+            "description": "昵称",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "description": "邮箱",
+            "nullable": true
+          },
+          "phonenumber": {
+            "type": "string",
+            "description": "手机号",
+            "nullable": true
+          },
+          "sex": {
+            "type": "string",
+            "description": "性别：0男、1女、2未知",
+            "nullable": true
+          },
+          "avatar": {
+            "type": "string",
+            "description": "头像地址",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "description": "状态：0正常、1停用",
+            "nullable": true
+          },
+          "delFlag": {
+            "type": "string",
+            "description": "删除标记：0存在、2删除",
+            "nullable": true
+          },
+          "loginIp": {
+            "type": "string",
+            "description": "最后登录IP",
+            "nullable": true
+          },
+          "loginDate": {
+            "type": "string",
+            "description": "最后登录时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "createBy": {
+            "type": "string",
+            "description": "创建人",
+            "nullable": true
+          },
+          "createTime": {
+            "type": "string",
+            "description": "创建时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "updateBy": {
+            "type": "string",
+            "description": "更新人",
+            "nullable": true
+          },
+          "updateTime": {
+            "type": "string",
+            "description": "更新时间，yyyy-MM-dd HH:mm:ss",
+            "nullable": true
+          },
+          "remark": {
+            "type": "string",
+            "description": "备注",
+            "nullable": true
+          },
+          "userId": {
+            "type": "integer",
+            "description": "用户ID",
+            "format": "int64",
+            "nullable": true
+          },
+          "deptId": {
+            "type": "integer",
+            "description": "部门ID",
+            "format": "int64",
+            "nullable": true
+          },
+          "roleId": {
+            "type": "integer",
+            "description": "角色查询辅助字段，可能为null",
+            "format": "int64",
+            "nullable": true
+          },
+          "admin": {
+            "type": "boolean",
+            "description": "是否超级管理员；沿用若依用户ID=1的规则。"
+          },
+          "pwdUpdateDate": {
+            "description": "最近密码更新时间，可能为null；使用当前Jackson默认日期格式。",
+            "nullable": true
+          },
+          "dept": {
+            "type": "object",
+            "description": "所属部门；没有部门时为null。",
+            "nullable": true,
+            "additionalProperties": true
+          },
+          "roles": {
+            "type": "array",
+            "description": "用户已关联的角色对象。",
+            "nullable": true,
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "roleIds": {
+            "type": "array",
+            "description": "角色ID辅助字段，可能为null。",
+            "nullable": true,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "postIds": {
+            "type": "array",
+            "description": "岗位ID辅助字段，可能为null。",
+            "nullable": true,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "params": {
+            "type": "object",
+            "description": "若依附加参数；为空时省略。",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      },
+      "UserInfoResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AjaxResult"
+          },
+          {
+            "type": "object",
+            "required": [
+              "user",
+              "roles",
+              "permissions",
+              "pwdChrtype",
+              "isDefaultModifyPwd",
+              "isPasswordExpired"
+            ],
+            "properties": {
+              "user": {
+                "$ref": "#/components/schemas/SysUserResponse"
+              },
+              "roles": {
+                "type": "array",
+                "description": "角色标识集合；超级管理员为admin。",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "permissions": {
+                "type": "array",
+                "description": "权限标识集合；超级管理员为*:*:*。",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pwdChrtype": {
+                "type": "string",
+                "description": "密码字符规则配置，默认0。"
+              },
+              "isDefaultModifyPwd": {
+                "type": "boolean",
+                "description": "是否提醒修改初始密码。"
+              },
+              "isPasswordExpired": {
+                "type": "boolean",
+                "description": "是否触发密码过期提醒；当前接口仅返回提醒状态。"
+              }
+            }
+          }
+        ]
+      },
+      "MetaVo": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "菜单展示名称",
+            "nullable": true
+          },
+          "icon": {
+            "type": "string",
+            "description": "图标标识",
+            "nullable": true
+          },
+          "noCache": {
+            "type": "boolean",
+            "description": "true表示不缓存页面"
+          },
+          "link": {
+            "type": "string",
+            "description": "外部链接地址，无链接时可能为null",
+            "nullable": true
+          }
+        }
+      },
+      "RoutersResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AjaxResult"
+          },
+          {
+            "type": "object",
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "type": "array",
+                "description": "已授权菜单树；没有菜单时为空数组。",
+                "items": {
+                  "$ref": "#/components/schemas/RouterVo"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "参数或验证码错误",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AjaxResult"
+            },
+            "examples": {
+              "default": {
+                "summary": "参数或验证码错误",
+                "value": {
+                  "code": 400,
+                  "msg": "验证码错误"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "未登录、Token无效或用户名密码错误",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AjaxResult"
+            },
+            "examples": {
+              "default": {
+                "summary": "未登录、Token无效或用户名密码错误",
+                "value": {
+                  "code": 401,
+                  "msg": "请先登录"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "无访问权限或IP禁止登录",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AjaxResult"
+            },
+            "examples": {
+              "default": {
+                "summary": "无访问权限或IP禁止登录",
+                "value": {
+                  "code": 403,
+                  "msg": "没有访问权限"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Unavailable": {
+        "description": "数据库或Redis服务不可用",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AjaxResult"
+            },
+            "examples": {
+              "default": {
+                "summary": "数据库或Redis服务不可用",
+                "value": {
+                  "code": 503,
+                  "msg": "数据库或缓存服务暂不可用"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "密码重试次数过多，默认限制10分钟",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AjaxResult"
+            },
+            "examples": {
+              "default": {
+                "summary": "密码重试次数过多，默认限制10分钟",
+                "value": {
+                  "code": 429,
+                  "msg": "密码错误次数过多，请 10 分钟后重试"
+                }
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "未预期的服务内部异常",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AjaxResult"
+            },
+            "examples": {
+              "default": {
+                "summary": "未预期的服务内部异常",
+                "value": {
+                  "code": 500,
+                  "msg": "系统异常，请稍后重试"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

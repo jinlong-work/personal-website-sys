@@ -1,0 +1,107 @@
+server:
+  port: 8080
+  servlet:
+    # 应用的访问路径
+    context-path: /
+  tomcat:
+    # tomcat的URI编码
+    uri-encoding: UTF-8
+    # 连接数满后的排队数，默认为100
+    accept-count: 1000
+    threads:
+      # tomcat最大线程数，默认为200
+      max: 800
+      # Tomcat启动初始化的线程数，默认值10
+      min-spare: 100
+
+spring:
+  config:
+    import: optional:file:./.local/minio.yml
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 3MB
+  application:
+    name: personal-website-sys
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 10000
+  sql:
+    init:
+      mode: never
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      database: ${SPRING_DATA_REDIS_DATABASE:0}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      connect-timeout: 5s
+      timeout: 5s
+
+
+
+mybatis-plus:
+  type-aliases-package: com.jinlong.common.core.domain.entity,com.jinlong.system.domain
+  mapper-locations: classpath*:mapper/system/*Mapper.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+
+app:
+  storage:
+    minio:
+      endpoint: ${MINIO_ENDPOINT:}
+      access-key: ${MINIO_ACCESS_KEY:}
+      secret-key: ${MINIO_SECRET_KEY:}
+      avatar-bucket: ${MINIO_AVATAR_BUCKET:website-avatars}
+  auth:
+    allowed-origins: ${AUTH_ALLOWED_ORIGINS:}
+
+ruoyi:
+  captchaType: math
+
+user:
+  password:
+    maxRetryCount: 5
+    lockTime: 10
+
+# 参考若依：JWT携带登录标识，服务端缓存控制有效期，单位为分钟。
+token:
+  header: Authorization
+  secret: ${JWT_SECRET:}
+  issuer: personal-website-sys
+  expire-time: 30
+  refresh-threshold: 20
+  max-lifetime: 480
+  key-prefix: ${AUTH_REDIS_KEY_PREFIX:personal-website:auth}
+
+# 控制台与文件采用相同格式，通过 requestId 关联一次请求的全部日志。
+logging:
+  level:
+    root: INFO
+    com.jinlong: INFO
+    audit: INFO
+    org.springframework.web: WARN
+    org.mybatis: WARN
+    com.baomidou.mybatisplus: WARN
+  file:
+    name: ${LOG_PATH:./logs}/application.log
+  charset:
+    console: UTF-8
+    file: UTF-8
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Shanghai} %-5level [%thread] [requestId=%X{requestId:-none}] [userId=%X{userId:-anonymous}] %logger{60} - %msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Shanghai} %-5level [%thread] [requestId=%X{requestId:-none}] [userId=%X{userId:-anonymous}] %logger{60} - %msg%n'
+  logback:
+    rollingpolicy:
+      file-name-pattern: ${LOG_PATH:./logs}/archive/application.%d{yyyy-MM-dd}.%i.log.gz
+      max-file-size: 10MB
+      max-history: 14
+      total-size-cap: 1GB
+      clean-history-on-start: true

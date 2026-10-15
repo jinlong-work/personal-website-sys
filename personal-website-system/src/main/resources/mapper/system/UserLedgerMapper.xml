@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jinlong.system.mapper.UserLedgerMapper">
+    <sql id="effectiveRole">
+        CASE WHEN u.user_id = 1 OR EXISTS (
+            SELECT 1 FROM sys_user_role ur JOIN sys_role r ON r.role_id = ur.role_id
+            WHERE ur.user_id = u.user_id AND r.role_key = 'admin' AND r.status = '0' AND r.del_flag = '0'
+        ) THEN 'admin' WHEN EXISTS (
+            SELECT 1 FROM sys_user_role ur JOIN sys_role r ON r.role_id = ur.role_id
+            WHERE ur.user_id = u.user_id AND r.role_key = 'manager' AND r.status = '0' AND r.del_flag = '0'
+        ) THEN 'manager' ELSE 'common' END
+    </sql>
+    <sql id="filters">
+        WHERE u.del_flag = '0'
+        <if test="keyword != null and keyword != ''">
+            AND (u.user_name ILIKE CONCAT('%', #{keyword}, '%')
+                OR u.nick_name ILIKE CONCAT('%', #{keyword}, '%') OR u.email ILIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="role != null and role != ''">AND (<include refid="effectiveRole"/>) = #{role}</if>
+        <if test="status != null and status != ''">AND u.status = #{status}</if>
+        <if test="restricted">
+            AND (u.user_id = #{actorId} OR ((<include refid="effectiveRole"/>) = 'common' AND NOT EXISTS (
+                SELECT 1 FROM sys_user_role ur JOIN sys_role r ON r.role_id = ur.role_id
+                WHERE ur.user_id = u.user_id AND r.del_flag = '0' AND r.role_key != 'common'
+            )))
+        </if>
+    </sql>
+    <!-- 005迁移的单角色唯一约束保证每个用户至多一行；由 MyBatis-Plus 生成分页及总数 SQL。台账不读取密码。 -->
+    <select id="selectLedgerPage" resultMap="com.jinlong.system.mapper.SysUserMapper.SysUserResult" resultOrdered="true">
+        SELECT u.user_id, u.user_name, u.nick_name, u.email, u.phonenumber, u.avatar, u.status, u.del_flag,
+            u.create_time, u.update_time, u.login_date, r.role_id, r.role_name, r.role_key,
+            r.role_sort, r.data_scope, r.status AS role_status
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON ur.user_id = u.user_id
+        LEFT JOIN sys_role r ON r.role_id = ur.role_id AND r.del_flag = '0'
+        <include refid="filters"/>
+        ORDER BY u.create_time DESC, u.user_id DESC, r.role_id
+    </select>
+    <select id="lockUsers" resultType="long">
+        SELECT user_id FROM sys_user WHERE user_id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">#{id}</foreach>
+        ORDER BY user_id FOR UPDATE
+    </select>
+    <insert id="insertLedgerUser" useGeneratedKeys="true" keyProperty="userId" keyColumn="user_id">
+        INSERT INTO sys_user (user_name, nick_name, email, phonenumber, avatar, password, status, pwd_update_date, create_by)
+        VALUES (#{userName}, #{nickName}, #{email}, #{phonenumber}, COALESCE(#{avatar}, ''), #{password}, #{status}, CURRENT_TIMESTAMP, #{createBy})
+    </insert>
+    <update id="updateLedgerUser">
+        UPDATE sys_user SET user_name = #{userName}, nick_name = #{nickName}, email = #{email},
+            phonenumber = #{phonenumber}, avatar = #{avatar}, status = #{status}, update_by = #{updateBy}, update_time = CURRENT_TIMESTAMP
+        WHERE user_id = #{userId} AND del_flag = '0'
+    </update>
+    <update id="resetPassword">
+        UPDATE sys_user SET password = #{password}, pwd_update_date = CURRENT_TIMESTAMP,
+            update_by = #{updateBy}, update_time = CURRENT_TIMESTAMP WHERE user_id = #{userId} AND del_flag = '0'
+    </update>
+    <insert id="insertRoleIfMissing">
+        INSERT INTO sys_role (role_name, role_key, role_sort, create_by)
+        VALUES (#{name}, #{key}, #{sort}, 'user-management') ON CONFLICT (role_key) DO NOTHING
+    </insert>
+    <select id="selectActiveRole" resultMap="com.jinlong.system.mapper.SysRoleMapper.SysRoleResult">
+        SELECT * FROM sys_role WHERE role_key = #{key} AND status = '0' AND del_flag = '0' FOR SHARE
+    </select>
+</mapper>

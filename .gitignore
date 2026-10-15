@@ -2,10 +2,13 @@ HELP.md
 # 本机开发数据库凭据，不提交到远程仓库。
 **/src/main/resources/application-dev.yml
 release/app.env
+.local/
+.ai/
 logs/
 *.log
 *.log.gz
 target/
+.test-runtime/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

@@ -1,0 +1,1135 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "\u4e2a\u4eba\u7f51\u7ad9\u8ba4\u8bc1\u63a5\u53e3\uff08\u65b0\u7248\u5bfc\u5165\u6587\u4ef6\uff09",
+    "version": "1.2.0",
+    "description": "\u51715\u4e2a\u63a5\u53e3\uff0c\u7b2c\u4e00\u9879\u4e3aPOST /login\u3002\u9ed8\u8ba4\u5730\u5740http://localhost:8080\u3002\u6240\u6709\u8bf7\u6c42\u548c\u54cd\u5e94\u6a21\u578b\u76f4\u63a5\u5185\u8054\uff0c\u65b9\u4fbf\u5355\u6587\u4ef6\u5bfc\u5165\u3002"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "tags": [
+    {
+      "name": "\u7f51\u7ad9\u8ba4\u8bc1\uff08\u65b0\u7248\uff09",
+      "description": "\u767b\u5f55\u3001\u9a8c\u8bc1\u7801\u3001\u5f53\u524d\u7528\u6237\u3001\u83dc\u5355\u8def\u7531\u4e0e\u9000\u51fa\u767b\u5f55"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "\u7f51\u7ad9\u8ba4\u8bc1\uff08\u65b0\u7248\uff09"
+        ],
+        "operationId": "personalWebsite_login",
+        "summary": "\u7528\u6237\u767b\u5f55 POST /login",
+        "description": "Content-Type: application/json\uff0c\u65e0\u9700Token\u3002\n\u9a8c\u8bc1\u7801\u5f00\u542f\u65f6\u5148\u8c03\u7528/captchaImage\uff0c\u4f7f\u7528\u5176uuid\u53ca\u56fe\u7247\u7b54\u6848\uff1b\u5173\u95ed\u65f6\u53ea\u9700username\u548cpassword\u3002\n\u5bc6\u7801\u81f3\u5c115\u4e2a\u5b57\u7b26\u3001UTF-8\u7f16\u7801\u4e0d\u8d85\u8fc772\u5b57\u8282\u3002\u9ed8\u8ba45\u6b21\u5bc6\u7801\u9519\u8bef\u540e\u9650\u523610\u5206\u949f\u3002\n\u767b\u5f55\u6210\u529f\u540e\u590d\u5236\u9876\u5c42token\uff0c\u5728\u540e\u7eed\u63a5\u53e3Bearer\u8ba4\u8bc1\u4e2d\u586b\u5165\u539f\u59cbToken\uff0c\u5de5\u5177\u4f1a\u62fc\u63a5Bearer\u524d\u7f00\u3002\n\u9a8c\u8bc1\u7801\u5728\u8d26\u53f7\u5bc6\u7801\u6821\u9a8c\u4e4b\u524d\u9a8c\u8bc1\u5e76\u6d88\u8d39\uff1b\u8d26\u53f7\u5bc6\u7801\u5931\u8d25\u540e\u4e5f\u8981\u91cd\u65b0\u83b7\u53d6\u9a8c\u8bc1\u7801\u3002",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ],
+                "properties": {
+                  "username": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 100,
+                    "example": "admin",
+                    "description": "\u767b\u5f55\u8d26\u53f7\uff0c2\uff5e100\u4e2a\u5b57\u7b26\uff0c\u5927\u5c0f\u5199\u4e0d\u654f\u611f\uff0c\u4e0d\u5141\u8bb8\u4e24\u7aef\u7a7a\u767d\u3002"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 5,
+                    "description": "\u6700\u591a72\u4e2aUTF-8\u5b57\u8282"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "\u5f00\u542f\u9a8c\u8bc1\u7801\u65f6\u5fc5\u586b",
+                    "example": "6"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "description": "\u5f00\u542f\u9a8c\u8bc1\u7801\u65f6\u5fc5\u586b\uff0c\u6765\u81eacaptchaImage",
+                    "example": "12345678123456781234567812345678",
+                    "pattern": "^[a-fA-F0-9]{32}$"
+                  }
+                },
+                "description": "\u9a8c\u8bc1\u7801\u5f00\u5173\u4e3atrue\u65f6code\u4e0euuid\u5fc5\u586b\uff0c\u4e3afalse\u65f6\u53ef\u7701\u7565\uff1b\u5bc6\u7801\u4e0d\u8fdb\u884ctrim\u5904\u7406\u3002"
+              },
+              "example": {
+                "username": "admin",
+                "password": "REPLACE_WITH_YOUR_PASSWORD",
+                "code": "6",
+                "uuid": "12345678123456781234567812345678"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "\u767b\u5f55\u6210\u529f\uff0ctoken\u4f4d\u4e8e\u9876\u5c42",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg",
+                    "token"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    },
+                    "token": {
+                      "type": "string",
+                      "description": "JWT\u4ee4\u724c\uff0c\u53d6\u9876\u5c42token\uff0c\u4e0d\u662fdata.token\u3002"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "\u64cd\u4f5c\u6210\u529f",
+                  "token": "<JWT\u4ee4\u724c>"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "\u53c2\u6570\u6216\u9a8c\u8bc1\u7801\u9519\u8bef",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 400,
+                  "msg": "\u9a8c\u8bc1\u7801\u9519\u8bef"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "\u7528\u6237\u540d\u3001\u5bc6\u7801\u6216\u8d26\u53f7\u72b6\u6001\u4e0d\u6ee1\u8db3\u767b\u5f55\u6761\u4ef6",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 401,
+                  "msg": "\u7528\u6237\u4e0d\u5b58\u5728\u6216\u5bc6\u7801\u9519\u8bef"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "\u65e0\u8bbf\u95ee\u6743\u9650\u6216IP\u7981\u6b62\u767b\u5f55",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 403,
+                  "msg": "\u6ca1\u6709\u8bbf\u95ee\u6743\u9650"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "\u5bc6\u7801\u91cd\u8bd5\u6b21\u6570\u8fc7\u591a\uff0c\u9ed8\u8ba4\u9650\u523610\u5206\u949f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 429,
+                  "msg": "\u5bc6\u7801\u9519\u8bef\u6b21\u6570\u8fc7\u591a\uff0c\u8bf7 10 \u5206\u949f\u540e\u91cd\u8bd5"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "\u6570\u636e\u5e93\u6216Redis\u670d\u52a1\u4e0d\u53ef\u7528",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 503,
+                  "msg": "\u6570\u636e\u5e93\u6216\u7f13\u5b58\u670d\u52a1\u6682\u4e0d\u53ef\u7528"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u672a\u9884\u671f\u7684\u670d\u52a1\u5185\u90e8\u5f02\u5e38",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 500,
+                  "msg": "\u7cfb\u7edf\u5f02\u5e38\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/captchaImage": {
+      "get": {
+        "tags": [
+          "\u7f51\u7ad9\u8ba4\u8bc1\uff08\u65b0\u7248\uff09"
+        ],
+        "operationId": "personalWebsite_getCode",
+        "summary": "\u83b7\u53d6\u9a8c\u8bc1\u7801 GET /captchaImage",
+        "description": "\u65e0\u9700Token\u3001\u65e0\u9700\u8bf7\u6c42\u53c2\u6570\u3002\n\u8fd4\u56decaptchaEnabled=true\u65f6\uff0c\u8bb0\u5f55uuid\uff0c\u5e76\u5c06img\u62fc\u63a5\u4e3adata:image/jpeg;base64,<img>\u663e\u793a\u56fe\u7247\u3002\n\u6570\u5b66\u56fe\u7247\u53ea\u63d0\u4ea4\u8ba1\u7b97\u7b54\u6848\uff1b\u5b57\u7b26\u56fe\u7247\u63d0\u4ea4\u56fe\u4e2d\u6587\u5b57\u3002\u83b7\u53d6\u56fe\u7247\u4e0d\u4f1a\u76f4\u63a5\u8fd4\u56de\u7b54\u6848\u3002\n\u6709\u6548\u671f2\u5206\u949f\uff0c\u6bcf\u6b21\u767b\u5f55\u5c1d\u8bd5\u90fd\u4f1a\u6d88\u8d39\u9a8c\u8bc1\u7801\uff1b\u518d\u6b21\u5c1d\u8bd5\u5fc5\u987b\u91cd\u65b0\u83b7\u53d6\u3002\ncaptchaEnabled=false\u65f6\u7701\u7565code\u548cuuid\u5373\u53ef\u767b\u5f55\u3002",
+        "responses": {
+          "200": {
+            "description": "\u9a8c\u8bc1\u7801\u5f00\u542f\u6216\u5173\u95ed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg",
+                    "captchaEnabled"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    },
+                    "captchaEnabled": {
+                      "type": "boolean",
+                      "description": "\u9a8c\u8bc1\u7801\u662f\u5426\u5f00\u542f\uff1bfalse\u65f6\u4e0d\u8fd4\u56deuuid\u548cimg\u3002"
+                    },
+                    "uuid": {
+                      "type": "string",
+                      "description": "\u672c\u6b21\u9a8c\u8bc1\u7801\u6807\u8bc6\uff0c\u767b\u5f55\u65f6\u539f\u6837\u63d0\u4ea4\u3002"
+                    },
+                    "img": {
+                      "type": "string",
+                      "description": "JPEG\u56fe\u7247\u7684Base64\u6587\u672c\uff0c\u6ca1\u6709data:\u524d\u7f00\uff1b\u53ef\u62fc\u63a5data:image/jpeg;base64,\u540e\u5728\u6d4f\u89c8\u5668\u4e2d\u663e\u793a\u3002"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "\u64cd\u4f5c\u6210\u529f",
+                  "captchaEnabled": true,
+                  "uuid": "12345678123456781234567812345678",
+                  "img": "<Base64 JPEG\u56fe\u7247>"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "\u6570\u636e\u5e93\u6216Redis\u670d\u52a1\u4e0d\u53ef\u7528",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 503,
+                  "msg": "\u6570\u636e\u5e93\u6216\u7f13\u5b58\u670d\u52a1\u6682\u4e0d\u53ef\u7528"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u672a\u9884\u671f\u7684\u670d\u52a1\u5185\u90e8\u5f02\u5e38",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 500,
+                  "msg": "\u7cfb\u7edf\u5f02\u5e38\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/getInfo": {
+      "get": {
+        "tags": [
+          "\u7f51\u7ad9\u8ba4\u8bc1\uff08\u65b0\u7248\uff09"
+        ],
+        "operationId": "personalWebsite_getInfo",
+        "summary": "\u5f53\u524d\u7528\u6237 GET /getInfo",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u5f53\u524d\u7528\u6237\u3001\u89d2\u8272\u3001\u6743\u9650\u548c\u5bc6\u7801\u63d0\u9192\u914d\u7f6e",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg",
+                    "user",
+                    "roles",
+                    "permissions",
+                    "pwdChrtype",
+                    "isDefaultModifyPwd",
+                    "isPasswordExpired"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    },
+                    "user": {
+                      "type": "object",
+                      "description": "\u5f53\u524d\u7528\u6237\u8d44\u6599\uff0c\u7981\u6b62\u8fd4\u56depassword\u6216password_hash\u3002\u90e8\u5206\u672a\u8bbe\u7f6e\u5b57\u6bb5\u4e3anull\u3002",
+                      "properties": {
+                        "userName": {
+                          "type": "string",
+                          "description": "\u767b\u5f55\u8d26\u53f7",
+                          "nullable": true
+                        },
+                        "nickName": {
+                          "type": "string",
+                          "description": "\u6635\u79f0",
+                          "nullable": true
+                        },
+                        "email": {
+                          "type": "string",
+                          "description": "\u90ae\u7bb1",
+                          "nullable": true
+                        },
+                        "phonenumber": {
+                          "type": "string",
+                          "description": "\u624b\u673a\u53f7",
+                          "nullable": true
+                        },
+                        "sex": {
+                          "type": "string",
+                          "description": "\u6027\u522b\uff1a0\u7537\u30011\u5973\u30012\u672a\u77e5",
+                          "nullable": true
+                        },
+                        "avatar": {
+                          "type": "string",
+                          "description": "\u5934\u50cf\u5730\u5740",
+                          "nullable": true
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "\u72b6\u6001\uff1a0\u6b63\u5e38\u30011\u505c\u7528",
+                          "nullable": true
+                        },
+                        "delFlag": {
+                          "type": "string",
+                          "description": "\u5220\u9664\u6807\u8bb0\uff1a0\u5b58\u5728\u30012\u5220\u9664",
+                          "nullable": true
+                        },
+                        "loginIp": {
+                          "type": "string",
+                          "description": "\u6700\u540e\u767b\u5f55IP",
+                          "nullable": true
+                        },
+                        "loginDate": {
+                          "type": "string",
+                          "description": "\u6700\u540e\u767b\u5f55\u65f6\u95f4\uff0cyyyy-MM-dd HH:mm:ss",
+                          "nullable": true
+                        },
+                        "createBy": {
+                          "type": "string",
+                          "description": "\u521b\u5efa\u4eba",
+                          "nullable": true
+                        },
+                        "createTime": {
+                          "type": "string",
+                          "description": "\u521b\u5efa\u65f6\u95f4\uff0cyyyy-MM-dd HH:mm:ss",
+                          "nullable": true
+                        },
+                        "updateBy": {
+                          "type": "string",
+                          "description": "\u66f4\u65b0\u4eba",
+                          "nullable": true
+                        },
+                        "updateTime": {
+                          "type": "string",
+                          "description": "\u66f4\u65b0\u65f6\u95f4\uff0cyyyy-MM-dd HH:mm:ss",
+                          "nullable": true
+                        },
+                        "remark": {
+                          "type": "string",
+                          "description": "\u5907\u6ce8",
+                          "nullable": true
+                        },
+                        "userId": {
+                          "type": "integer",
+                          "description": "\u7528\u6237ID",
+                          "format": "int64",
+                          "nullable": true
+                        },
+                        "deptId": {
+                          "type": "integer",
+                          "description": "\u90e8\u95e8ID",
+                          "format": "int64",
+                          "nullable": true
+                        },
+                        "roleId": {
+                          "type": "integer",
+                          "description": "\u89d2\u8272\u67e5\u8be2\u8f85\u52a9\u5b57\u6bb5\uff0c\u53ef\u80fd\u4e3anull",
+                          "format": "int64",
+                          "nullable": true
+                        },
+                        "admin": {
+                          "type": "boolean",
+                          "description": "\u662f\u5426\u8d85\u7ea7\u7ba1\u7406\u5458\uff1b\u6cbf\u7528\u82e5\u4f9d\u7528\u6237ID=1\u7684\u89c4\u5219\u3002"
+                        },
+                        "pwdUpdateDate": {
+                          "description": "\u6700\u8fd1\u5bc6\u7801\u66f4\u65b0\u65f6\u95f4\uff0c\u53ef\u80fd\u4e3anull\uff1b\u4f7f\u7528\u5f53\u524dJackson\u9ed8\u8ba4\u65e5\u671f\u683c\u5f0f\u3002",
+                          "nullable": true
+                        },
+                        "dept": {
+                          "type": "object",
+                          "description": "\u6240\u5c5e\u90e8\u95e8\uff1b\u6ca1\u6709\u90e8\u95e8\u65f6\u4e3anull\u3002",
+                          "nullable": true,
+                          "additionalProperties": true
+                        },
+                        "roles": {
+                          "type": "array",
+                          "description": "\u7528\u6237\u5df2\u5173\u8054\u7684\u89d2\u8272\u5bf9\u8c61\u3002",
+                          "nullable": true,
+                          "items": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        },
+                        "roleIds": {
+                          "type": "array",
+                          "description": "\u89d2\u8272ID\u8f85\u52a9\u5b57\u6bb5\uff0c\u53ef\u80fd\u4e3anull\u3002",
+                          "nullable": true,
+                          "items": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        },
+                        "postIds": {
+                          "type": "array",
+                          "description": "\u5c97\u4f4dID\u8f85\u52a9\u5b57\u6bb5\uff0c\u53ef\u80fd\u4e3anull\u3002",
+                          "nullable": true,
+                          "items": {
+                            "type": "integer",
+                            "format": "int64"
+                          }
+                        },
+                        "params": {
+                          "type": "object",
+                          "description": "\u82e5\u4f9d\u9644\u52a0\u53c2\u6570\uff1b\u4e3a\u7a7a\u65f6\u7701\u7565\u3002",
+                          "additionalProperties": true
+                        }
+                      },
+                      "additionalProperties": true
+                    },
+                    "roles": {
+                      "type": "array",
+                      "description": "\u89d2\u8272\u6807\u8bc6\u96c6\u5408\uff1b\u8d85\u7ea7\u7ba1\u7406\u5458\u4e3aadmin\u3002",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "permissions": {
+                      "type": "array",
+                      "description": "\u6743\u9650\u6807\u8bc6\u96c6\u5408\uff1b\u8d85\u7ea7\u7ba1\u7406\u5458\u4e3a*:*:*\u3002",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "pwdChrtype": {
+                      "type": "string",
+                      "description": "\u5bc6\u7801\u5b57\u7b26\u89c4\u5219\u914d\u7f6e\uff0c\u9ed8\u8ba40\u3002"
+                    },
+                    "isDefaultModifyPwd": {
+                      "type": "boolean",
+                      "description": "\u662f\u5426\u63d0\u9192\u4fee\u6539\u521d\u59cb\u5bc6\u7801\u3002"
+                    },
+                    "isPasswordExpired": {
+                      "type": "boolean",
+                      "description": "\u662f\u5426\u89e6\u53d1\u5bc6\u7801\u8fc7\u671f\u63d0\u9192\uff1b\u5f53\u524d\u63a5\u53e3\u4ec5\u8fd4\u56de\u63d0\u9192\u72b6\u6001\u3002"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "\u64cd\u4f5c\u6210\u529f",
+                  "user": {
+                    "userId": 1,
+                    "deptId": 100,
+                    "userName": "admin",
+                    "nickName": "\u7ba1\u7406\u5458",
+                    "admin": true,
+                    "email": "",
+                    "phonenumber": "",
+                    "sex": "2",
+                    "avatar": "",
+                    "status": "0",
+                    "delFlag": "0"
+                  },
+                  "roles": [
+                    "admin"
+                  ],
+                  "permissions": [
+                    "*:*:*"
+                  ],
+                  "pwdChrtype": "0",
+                  "isDefaultModifyPwd": false,
+                  "isPasswordExpired": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "\u672a\u767b\u5f55\u3001Token\u65e0\u6548\u6216\u7528\u6237\u540d\u5bc6\u7801\u9519\u8bef",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 401,
+                  "msg": "\u8bf7\u5148\u767b\u5f55"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "\u6570\u636e\u5e93\u6216Redis\u670d\u52a1\u4e0d\u53ef\u7528",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 503,
+                  "msg": "\u6570\u636e\u5e93\u6216\u7f13\u5b58\u670d\u52a1\u6682\u4e0d\u53ef\u7528"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u672a\u9884\u671f\u7684\u670d\u52a1\u5185\u90e8\u5f02\u5e38",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 500,
+                  "msg": "\u7cfb\u7edf\u5f02\u5e38\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "\u65e0\u8bbf\u95ee\u6743\u9650\u6216IP\u7981\u6b62\u767b\u5f55",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 403,
+                  "msg": "\u6ca1\u6709\u8bbf\u95ee\u6743\u9650"
+                }
+              }
+            }
+          }
+        },
+        "description": "\u65e0\u9700\u8bf7\u6c42\u53c2\u6570\u3002\u9700\u8981\u6709\u6548Bearer Token\uff1b\u7528\u6237\u5bc6\u7801\u54c8\u5e0c\u4e0d\u4f1a\u51fa\u73b0\u5728\u54cd\u5e94\u4e2d\u3002\u89d2\u8272\u6216\u6743\u9650\u96c6\u5408\u65e0\u56fa\u5b9a\u987a\u5e8f\u3002"
+      }
+    },
+    "/getRouters": {
+      "get": {
+        "tags": [
+          "\u7f51\u7ad9\u8ba4\u8bc1\uff08\u65b0\u7248\uff09"
+        ],
+        "operationId": "personalWebsite_getRouters",
+        "summary": "\u83dc\u5355\u8def\u7531 GET /getRouters",
+        "description": "\u65e0\u9700\u8bf7\u6c42\u53c2\u6570\uff0c\u9700\u8981\u6709\u6548Bearer Token\u3002\u521d\u59cb\u5316\u811a\u672c\u6ca1\u6709\u9884\u7f6e\u6f14\u793a\u83dc\u5355\uff0c\u56e0\u6b64\u521d\u6b21\u6d4b\u8bd5data=[]\u5c5e\u4e8e\u6b63\u5e38\u7ed3\u679c\u3002",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "\u8def\u7531\u6570\u7ec4\uff1b\u5df2\u914d\u7f6e\u83dc\u5355\u65f6\u8fd4\u56de\u6811\u5f62\u7ed3\u6784",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    },
+                    "data": {
+                      "type": "array",
+                      "description": "\u5df2\u6388\u6743\u83dc\u5355\u6811\uff1b\u6ca1\u6709\u83dc\u5355\u65f6\u4e3a\u7a7a\u6570\u7ec4\u3002",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string"
+                          },
+                          "path": {
+                            "type": "string"
+                          },
+                          "hidden": {
+                            "type": "boolean"
+                          },
+                          "redirect": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "component": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "query": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "alwaysShow": {
+                            "type": "boolean"
+                          },
+                          "meta": {
+                            "type": "object",
+                            "properties": {
+                              "title": {
+                                "type": "string",
+                                "description": "\u83dc\u5355\u5c55\u793a\u540d\u79f0",
+                                "nullable": true
+                              },
+                              "icon": {
+                                "type": "string",
+                                "description": "\u56fe\u6807\u6807\u8bc6",
+                                "nullable": true
+                              },
+                              "noCache": {
+                                "type": "boolean",
+                                "description": "true\u8868\u793a\u4e0d\u7f13\u5b58\u9875\u9762"
+                              },
+                              "link": {
+                                "type": "string",
+                                "description": "\u5916\u90e8\u94fe\u63a5\u5730\u5740\uff0c\u65e0\u94fe\u63a5\u65f6\u53ef\u80fd\u4e3anull",
+                                "nullable": true
+                              }
+                            }
+                          },
+                          "children": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "description": "\u5b50\u8def\u7531\uff0c\u4e0e\u7236\u7ea7RouterVo\u7ed3\u6784\u76f8\u540c\u3002",
+                              "additionalProperties": true
+                            }
+                          }
+                        },
+                        "description": "\u82e5\u4f9d\u83dc\u5355\u8def\u7531\u5bf9\u8c61\u3002\u7a7a\u5b57\u7b26\u4e32\u3001\u7a7a\u96c6\u5408\u548cnull\u5c5e\u6027\u901a\u5e38\u7701\u7565\uff1bquery\u4e3a\u5b57\u7b26\u4e32\uff0c\u4e0d\u662fJSON\u5bf9\u8c61\u3002"
+                      }
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "\u64cd\u4f5c\u6210\u529f",
+                  "data": []
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "\u672a\u767b\u5f55\u3001Token\u65e0\u6548\u6216\u7528\u6237\u540d\u5bc6\u7801\u9519\u8bef",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 401,
+                  "msg": "\u8bf7\u5148\u767b\u5f55"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "\u6570\u636e\u5e93\u6216Redis\u670d\u52a1\u4e0d\u53ef\u7528",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 503,
+                  "msg": "\u6570\u636e\u5e93\u6216\u7f13\u5b58\u670d\u52a1\u6682\u4e0d\u53ef\u7528"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u672a\u9884\u671f\u7684\u670d\u52a1\u5185\u90e8\u5f02\u5e38",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 500,
+                  "msg": "\u7cfb\u7edf\u5f02\u5e38\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "\u65e0\u8bbf\u95ee\u6743\u9650\u6216IP\u7981\u6b62\u767b\u5f55",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 403,
+                  "msg": "\u6ca1\u6709\u8bbf\u95ee\u6743\u9650"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "\u7f51\u7ad9\u8ba4\u8bc1\uff08\u65b0\u7248\uff09"
+        ],
+        "operationId": "personalWebsite_logout",
+        "summary": "\u9000\u51fa\u767b\u5f55 POST /logout",
+        "description": "\u4ec5\u652f\u6301POST\uff0c\u65e0\u8bf7\u6c42\u4f53\u3002\n\u8981\u64a4\u9500\u5f53\u524d\u4f1a\u8bdd\u5fc5\u987b\u643a\u5e26\u767b\u5f55\u8fd4\u56de\u7684Bearer Token\u3002\u6210\u529f\u540e\u518d\u6b21\u4f7f\u7528\u540c\u4e00\u4e2aToken\u8c03\u7528/getInfo\u5e94\u8fd4\u56de401\u3002\n\u6ca1\u6709Token\u6216Token\u5df2\u5931\u6548\u65f6\u4e5f\u8fd4\u56de200\uff0c\u4f46\u4e0d\u4f1a\u64a4\u9500\u5176\u4ed6\u4f1a\u8bdd\uff1b\u53ea\u9000\u51fa\u5f53\u524d\u4f1a\u8bdd\u3002",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "\u9000\u51fa\u6210\u529f\uff0c\u65e0Token\u6216\u5df2\u9000\u51fa\u65f6\u4ecd\u8fd4\u56de\u6210\u529f",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "\u9000\u51fa\u6210\u529f"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "\u6570\u636e\u5e93\u6216Redis\u670d\u52a1\u4e0d\u53ef\u7528",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 503,
+                  "msg": "\u6570\u636e\u5e93\u6216\u7f13\u5b58\u670d\u52a1\u6682\u4e0d\u53ef\u7528"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "\u672a\u9884\u671f\u7684\u670d\u52a1\u5185\u90e8\u5f02\u5e38",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "code",
+                    "msg"
+                  ],
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "\u6210\u529f200\uff0c\u5931\u8d25\u5bf9\u5e94HTTP\u72b6\u6001\u7801",
+                      "example": 200
+                    },
+                    "msg": {
+                      "type": "string",
+                      "example": "\u64cd\u4f5c\u6210\u529f"
+                    }
+                  },
+                  "description": "\u82e5\u4f9d\u901a\u7528\u54cd\u5e94\u3002\u767b\u5f55Token\u3001\u5f53\u524d\u7528\u6237\u548c\u6743\u9650\u5b57\u6bb5\u4f4d\u4e8e\u9876\u5c42\uff1b\u8def\u7531\u6570\u7ec4\u4f4d\u4e8edata\u3002"
+                },
+                "example": {
+                  "code": 500,
+                  "msg": "\u7cfb\u7edf\u5f02\u5e38\uff0c\u8bf7\u7a0d\u540e\u91cd\u8bd5"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
