@@ -1,0 +1,405 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "name": "海南国家调查地图基层网点系统",
+      "type": "大屏二维项目",
+      "description": "该项目是⼀个集⼤屏数据可视化、地理信息分析与后台运维管理于⼀体的综合性平台。主要用于展示和管理调查机构、专业及区域的分布与实时数据，通过\"⼀张图\"的形式实现对海南省调查资源的直观监管。",
+      "technologies": [
+        "Vue 3",
+        "ArcGIS API for JS",
+        "Element Plus",
+        "ECharts"
+      ],
+      "achievements": [
+        "调查地图⼤屏开发：独立负责调查地图⼤屏的整体架构与开发，通过 ECharts 与Arcgis api for js，实现调查机构、调查专业及调查专业展示，支持多维度数据的实时动态渲染。在⼤屏中嵌⼊交互式地图逻辑，用户可通过地图下钻查看不同⾏政区划下的详细调查指标。",
+        "调查经济地图⼤屏开发：此大屏主要展示海南省全体居民、城镇居民、农村居民的收入收支情况，支持一系列数据查看，使用Echarts绘制海南省大致地图进行数据展示。",
+        "运维管理模块建设：开发配套的运维管理模块，运维管理模块负责管理大屏中的一系列数据的展示，包括调查机构、辅调员、调查证、调查网点管理。"
+      ],
+      "images": [
+        "/img/调查一张图.jpg",
+        "/img/调查一张图02.jpg",
+        "/img/调查一张图03.jpg",
+        "/img/调查一张图05.jpg"
+      ],
+      "category": "地图应用 · 数据可视化",
+      "headline": "调查资源，一张图看清。",
+      "summary": "海南国家调查地图基层网点系统。让调查机构、专业和区域数据汇聚在一张地图上。",
+      "english": {
+        "name": "Hainan National Survey Map Grassroots Network System",
+        "type": "2D Dashboard Project",
+        "description": "A comprehensive platform that combines big-screen data visualization, geospatial analysis, and backend operations management. It presents survey organizations, disciplines, and regional data through a unified one-map experience for Hainan Province.",
+        "technologies": [
+          "Vue 3",
+          "ArcGIS API for JS",
+          "Element Plus",
+          "ECharts"
+        ],
+        "achievements": [
+          "Owned the architecture and frontend delivery of the survey dashboard, integrating ECharts with ArcGIS API for JS to visualize institutions, disciplines, and multi-dimensional metrics with real-time updates and drill-down map interactions.",
+          "Built an economic dashboard that visualized income and expenditure data for urban and rural residents across Hainan using ECharts-based map presentations.",
+          "Delivered a companion operations module to maintain and display key dashboard data, including institutions, assistant investigators, credentials, and survey outlets."
+        ],
+        "category": "WEBGIS · DATA VISUALIZATION",
+        "headline": "Survey resources. One clear map.",
+        "summary": "The Hainan survey network system brings agencies, disciplines and regional data together on one map."
+      },
+      "featured": true,
+      "sortOrder": 0,
+      "status": "published"
+    },
+    {
+      "id": 2,
+      "name": "深造村便民服务系统",
+      "type": "大屏三维项目",
+      "description": "该系统为大屏三维项目，属于琼中番响村智慧乡村项目，提供了村庄总览用于展示村庄概述、现状人口统计和领导小组。提供管理一张图板块，通过实时三维地图，用户可以直观地查看村庄规划和基础设施布局。",
+      "technologies": [
+        "Vue 3",
+        "超图版Cesium",
+        "Element Plus"
+      ],
+      "achievements": [
+        "负责村庄总览大屏的开发工作，提供了村庄总览用于展示村庄概述、现状人口统计和领导小组。",
+        "根据项目需求完成三维维地图界面开发与地图服务加载，实现服务切换及查询功能，支持弹窗移动。",
+        "根据需求完成报建审查功能，用户可自行绘制区域、输入坐标来进行报建审查，判定绘制范围占用生态红线、林地、基本农田等的面积。"
+      ],
+      "images": [
+        "/img/深造村03.jpg",
+        "/img/深造村04-脱敏.webp"
+      ],
+      "category": "",
+      "headline": "",
+      "summary": "",
+      "english": {
+        "name": "Shenzao Village Public Service System",
+        "type": "3D Dashboard Project",
+        "description": "A 3D dashboard built for the smart-village initiative in Fanxiang Village, Qiongzhong. It provides a village overview, demographic summaries, leadership information, and a real-time 3D map for planning and infrastructure visualization.",
+        "technologies": [
+          "Vue 3",
+          "Cesium (SuperMap Edition)",
+          "Element Plus"
+        ],
+        "achievements": [
+          "Built the village overview dashboard used to present village profiles, population statistics, and leadership information.",
+          "Implemented the 3D map interface and service-loading workflow, including service switching, data queries, and draggable popup interactions.",
+          "Delivered a construction-review tool that let users draw areas or enter coordinates to evaluate overlaps with ecological red lines, forest land, and permanent farmland."
+        ],
+        "category": "",
+        "headline": "",
+        "summary": ""
+      },
+      "featured": false,
+      "sortOrder": 30,
+      "status": "published"
+    },
+    {
+      "id": 3,
+      "name": "海南三维项目",
+      "type": "三维项目",
+      "description": "海南3D项目是⼀个基于Vue 2和Cesium构建的三维地理信息系统应用，专注于提供海南地区的三维地理空间分析和可视化功能。该项目通过集成Cesium的强大功能，实现了对海南地区地理数据的三维展示和交互，支持用户进行空间分析、数据可视化和地图浏览等操作。项目旨在为用户提供一个直观、交互性强的三维地理信息平台，帮助用户更好地理解和分析海南地区的地理环境和空间关系。",
+      "technologies": [
+        "Vue 3",
+        "ArcGIS API for JS",
+        "Element Plus",
+        "ECharts"
+      ],
+      "achievements": [
+        "宜农资源分析：基于坡度分析计算符合条件的图斑面积，并输出可视化结果。支持三种获取分析区域方式：点击 ArcGIS 服务图斑、绘制矩形、上传文件，并通过超图服务完成区域分析展示。",
+        "⽔⼟保持监管：绘制区域对地形开挖，计算不同地形服务在绘制区域范围内的挖⽅量差值，评估⽔⼟流失情况。",
+        "交互功能：独立完成地图标绘系统（点线面体增删改查），多窗⼝对比分析功能以及比例尺组件开发。"
+      ],
+      "images": [
+        "/img/海南3D01.jpg",
+        "/img/海南3D03.jpg",
+        "/img/海南3D05.jpg",
+        "/img/海南3D06.jpg"
+      ],
+      "category": "02 / 三维地图 · 空间分析",
+      "headline": "把空间分析，带入三维。",
+      "summary": "海南三维项目：从地形分析到地图标绘，构建可交互的三维空间。",
+      "english": {
+        "name": "Hainan 3D GIS Project",
+        "type": "3D GIS Project",
+        "description": "A 3D geographic information system built with Vue and Cesium for Hainan. The project focuses on spatial analysis and 3D visualization, helping users explore geospatial data through interactive browsing, analysis, and visual presentation.",
+        "technologies": [
+          "Vue 3",
+          "ArcGIS API for JS",
+          "Element Plus",
+          "ECharts"
+        ],
+        "achievements": [
+          "Implemented agricultural suitability analysis based on slope calculations, with support for selecting analysis areas from ArcGIS features, drawn rectangles, or uploaded files.",
+          "Built soil and water conservation supervision tools that estimated excavation differences across terrain services to assess erosion risks.",
+          "Delivered advanced interactions including a full map markup system, multi-window comparison analysis, and custom scale components."
+        ],
+        "category": "02 / 3D GIS · SPATIAL ANALYSIS",
+        "headline": "Bring spatial analysis into 3D.",
+        "summary": "Interactive terrain analysis, map annotations and spatial exploration for the Hainan 3D project."
+      },
+      "featured": true,
+      "sortOrder": 10,
+      "status": "published"
+    },
+    {
+      "id": 5,
+      "name": "地籍知识库系统",
+      "type": "管理系统",
+      "description": "为地籍相关人员提供地籍知识检索、课程学习和试题练习的一站式知识管理平台，支持文档在线预览、视频课程播放、AI智能问答等功能。",
+      "technologies": [
+        "Vue 3",
+        "Element Plus",
+        "ECharts",
+        "Tailwindcss"
+      ],
+      "achievements": [
+        "多模块知识库系统：开发地籍资料库、课程库、试题库三大核心模块，实现知识分类管理与展示",
+        "智能检索与筛选：实现多维度搜索功能（按标题/正文搜索），支持按资料类型、发布机构、时间范围筛选及排序",
+        "在线文档预览：集成PDF.js实现PDF文档在线预览，支持文档元数据展示与目录导航",
+        "视频课程播放：开发课程播放功能，支持视频上传、进度展示、错误处理，使用Supabase SDK实现大文件分片上传",
+        "AI智能问答：集成Dify AI聊天机器人，支持全屏交互，在地籍资料库页面提供智能知识问答服务",
+        "管理后台系统：开发完整的CRUD管理功能，包括资料管理、课程管理、试题管理及用户认证系统",
+        "响应式设计：采用Tailwind CSS实现现代化响应式布局，适配不同屏幕尺寸，优化用户体验"
+      ],
+      "images": [
+        "/img/地籍知识库01.jpg",
+        "/img/地籍知识库03.jpg",
+        "/img/地籍知识库04.jpg",
+        "/img/地籍知识库06.jpg",
+        "/img/地籍知识库07.jpg"
+      ],
+      "category": "03 / 网站应用 · 知识管理",
+      "headline": "让专业知识，触手可及。",
+      "summary": "连接资料、课程与智能问答，一站式构建地籍知识管理与学习体验。",
+      "english": {
+        "name": "Cadastral Knowledge Base System",
+        "type": "Knowledge Management System",
+        "description": "A one-stop knowledge platform for cadastral professionals that supports knowledge retrieval, course learning, practice questions, online document preview, video playback, and AI-powered Q&A.",
+        "technologies": [
+          "Vue 3",
+          "Element Plus",
+          "ECharts",
+          "Tailwind CSS"
+        ],
+        "achievements": [
+          "Built three core modules for cadastral materials, courses, and question banks, enabling structured knowledge management and presentation.",
+          "Implemented multi-dimensional search and filtering by title, full text, resource type, publisher, date range, and sorting rules.",
+          "Integrated PDF.js for online PDF preview with document metadata display and table-of-contents navigation.",
+          "Developed video-course playback with upload, progress display, and error handling, and used Supabase SDK for large-file chunked uploads.",
+          "Integrated a Dify AI assistant to provide full-screen, knowledge-based conversational support inside the platform.",
+          "Built complete CRUD-based admin workflows for resources, courses, question banks, and user authentication.",
+          "Created a responsive UI with Tailwind CSS to improve usability across different screen sizes."
+        ],
+        "category": "03 / WEB APPLICATION · KNOWLEDGE",
+        "headline": "Expert knowledge within reach.",
+        "summary": "Documents, courses and Q&A in one place for cadastral knowledge management and learning."
+      },
+      "featured": true,
+      "sortOrder": 20,
+      "status": "published"
+    },
+    {
+      "id": 6,
+      "name": "海南省机器管督查系统",
+      "type": "管理系统",
+      "description": "面向海南省自然资源执法督查的一体化管理平台，整合海洋、林业、矿产、耕地等多领域执法督查功能，实现从问题发现、交办、整改到验收的全流程数字化管理。",
+      "technologies": [
+        "Vue 3",
+        "Element Plus",
+        "ECharts",
+        "Vite",
+        "Pinia",
+        "Axios"
+      ],
+      "achievements": [
+        "七大业务模块前端开发：独立完成海洋督查、林业督查、矿产执法、乱占耕地、省级卫片执法、砂纸岸线、督查问题七大模块的前端页面开发与功能实现",
+        "通用组件封装：抽象并封装时间线组件、材料上传组件、地图定位组件等公共组件，提升代码复用率和开发效率",
+        "复杂表单交互：实现多步骤填报流程、动态表格编辑、级联选择器、表单验证等复杂交互功能，优化用户操作体验",
+        "GIS地图前端集成：对接GIS地图服务，实现图斑定位、空间查询、影像图层切换等地图交互功能",
+        "数据可视化大屏：基于ECharts开发多维度数据统计页面，包含整改率趋势图、类型分布图、区域统计等图表",
+        "文件预览功能：集成vue3-pdf-app实现PDF在线预览，使用viewerjs实现图片查看器，支持材料在线查阅",
+        "批量操作优化：实现批量导入、批量导出、批量审核等功能，支持大文件上传与进度展示",
+        "响应式布局适配：采用动态计算表格高度、弹性布局等方式，适配不同屏幕尺寸，支持大屏展示模式",
+        "性能优化实践：使用Keep-alive缓存页面、虚拟列表优化大数据量表格、按需加载组件，提升系统响应速度",
+        "权限控制前端实现：基于角色权限动态渲染菜单、控制按钮显隐、过滤数据范围，保障前端安全"
+      ],
+      "images": [
+        "/img/机器管督查04.jpg",
+        "/img/机器管督查05.jpg",
+        "/img/机器管督查06.jpg"
+      ],
+      "category": "",
+      "headline": "",
+      "summary": "",
+      "english": {
+        "name": "Hainan Intelligent Supervision Platform",
+        "type": "Management System",
+        "description": "An integrated supervision platform for natural resources enforcement in Hainan, covering marine, forestry, mining, cultivated land, and related domains. It digitizes the full lifecycle from issue discovery and assignment to rectification and acceptance.",
+        "technologies": [
+          "Vue 3",
+          "Element Plus",
+          "ECharts",
+          "Vite",
+          "Pinia",
+          "Axios"
+        ],
+        "achievements": [
+          "Independently delivered frontend pages and features for seven business modules, including marine supervision, forestry inspection, mining enforcement, illegal farmland occupation, provincial satellite-image enforcement, coastline inspection, and issue management.",
+          "Designed reusable shared components such as a timeline, material upload module, and map positioning widget to improve development speed and consistency.",
+          "Implemented complex form interactions including multi-step workflows, dynamic table editing, cascaders, and robust validation.",
+          "Integrated GIS map services to support feature positioning, spatial queries, and imagery layer switching.",
+          "Built multi-dimensional data dashboards with ECharts, including trend charts, type distributions, and regional statistics.",
+          "Integrated vue3-pdf-app and viewerjs to support online preview of PDF files and images.",
+          "Optimized batch operations such as bulk import, export, and review, with large-file upload progress support.",
+          "Adapted layouts for multiple screen sizes with dynamic table heights and flexible page structures, including large-screen display modes.",
+          "Improved runtime performance through page caching, virtual lists for large tables, and on-demand component loading.",
+          "Implemented frontend permission controls with role-based menu rendering, button visibility rules, and data-scope filtering."
+        ],
+        "category": "",
+        "headline": "",
+        "summary": ""
+      },
+      "featured": false,
+      "sortOrder": 40,
+      "status": "published"
+    },
+    {
+      "id": 7,
+      "name": "海南岛台风路径展示",
+      "type": "二维项目",
+      "description": "为海南一张图系统二维地图添加台风路径展示功能，用户可通过地图查看不同台风的路径，支持一系列数据查看。",
+      "technologies": [
+        "Vue 2",
+        "ArcGIS API for JS"
+      ],
+      "achievements": [
+        "路径绘制：实线绘实况、虚线绘预报，不同台风用不同颜色，路径点按台风等级着色",
+        "风圈可视化：绘制七级/十级/十二级风圈（椭圆形，四个方向半径不同）",
+        "交互动效：台风图标持续旋转动画，点击路径点显示详情弹窗并重新绘制风圈"
+      ],
+      "images": [
+        "/img/台风路径展示.jpg"
+      ],
+      "category": "",
+      "headline": "",
+      "summary": "",
+      "english": {
+        "name": "Typhoon Track Visualization for Hainan Island",
+        "type": "2D Map Feature",
+        "description": "A typhoon-track visualization feature added to the 2D map of the Hainan one-map system, allowing users to inspect different storm paths together with supporting data.",
+        "technologies": [
+          "Vue 2",
+          "ArcGIS API for JS"
+        ],
+        "achievements": [
+          "Drew live tracks with solid lines and forecast tracks with dashed lines, using different colors for each typhoon and level-based coloring for track points.",
+          "Visualized level-7, level-10, and level-12 wind circles with elliptical geometry and different radii in four directions.",
+          "Added rotating typhoon-marker animation and interactive path points that reopened a details popup and re-rendered wind circles when clicked."
+        ],
+        "category": "",
+        "headline": "",
+        "summary": ""
+      },
+      "featured": false,
+      "sortOrder": 50,
+      "status": "published"
+    },
+    {
+      "id": 8,
+      "name": "烈士纪念设施一张图",
+      "type": "三维项目",
+      "description": "为海南一张图系统三维地图添加烈士纪念设施的展示功能，用户可通过地图查看不同烈士纪念设施的信息，支持一系列数据查看。",
+      "technologies": [
+        "Vue 3",
+        "Cesium",
+        "ECharts"
+      ],
+      "achievements": [
+        "大屏界面开发：负责烈士纪念设施一张图的大屏整体布局与样式实现",
+        "设施聚合展示：基于 Cesium 实现海南省烈士纪念设施的空间聚合展示，支持随地图缩放动态调整聚合粒度，直观呈现设施分布密度",
+        "详情交互功能：开发设施图标点击与列表选择双触发机制，点击后弹出详情弹窗，展示设施介绍、历史背景及相关图片资料"
+      ],
+      "images": [
+        "/img/烈士一张图01.jpg",
+        "/img/烈士一张图02.jpg",
+        "/img/烈士一张图03.jpg",
+        "/img/烈士一张图04.jpg"
+      ],
+      "category": "",
+      "headline": "",
+      "summary": "",
+      "english": {
+        "name": "Martyrs Memorial Facilities One-Map",
+        "type": "3D Map Feature",
+        "description": "A 3D visualization feature added to the Hainan one-map system to display memorial facilities for martyrs, enabling users to browse facility information directly on the map.",
+        "technologies": [
+          "Vue 3",
+          "Cesium",
+          "ECharts"
+        ],
+        "achievements": [
+          "Implemented the overall large-screen layout and styling for the memorial-facilities one-map interface.",
+          "Built Cesium-based clustering for memorial facilities across Hainan, with cluster granularity that adjusts dynamically as the map zoom level changes.",
+          "Implemented dual-trigger details interactions from both map icons and list selections, showing facility information, historical background, and related images in a popup."
+        ],
+        "category": "",
+        "headline": "",
+        "summary": ""
+      },
+      "featured": false,
+      "sortOrder": 60,
+      "status": "published"
+    },
+    {
+      "id": 9,
+      "name": "海南省林业一张图",
+      "type": "二维大屏项目",
+      "description": "面向海南省林业资源综合监管与专题分析建设的可视化平台，集中展示森林资源、公益林、湿地、自然保护地、红树林、森林防火和有害生物防控等业务数据，并通过一张图呈现资源概况、空间分布与应用系统入口。",
+      "technologies": [
+        "Vue 2",
+        "Element UI",
+        "ECharts",
+        "WebGIS",
+        "Axios"
+      ],
+      "achievements": [
+        "可视化大屏开发：完成 1920×1080 林业数据大屏的整体布局与页面开发，采用动态缩放适配不同分辨率，并构建可复用的指标卡片、图表和专题面板组件。",
+        "林业专题整合：围绕森林资源、公益林、自然保护地、红树林、森林防火和有害生物防控等业务，开发多类专题页面与统计图表。",
+        "WebGIS 地图集成：将林业专题地图嵌入大屏，联动展示资源分布、行政区划和业务指标，形成地图与两侧数据面板协同展示的一张图界面。",
+        "配置化与系统联动：使用 JSON 配置和 Axios 动态加载面板数据、菜单及跳转信息，整合数据中心和多个林业业务系统入口，提升页面扩展与维护效率。"
+      ],
+      "images": [
+        "/img/林业一张图01.jpg",
+        "/img/林业一张图02.jpg",
+        "/img/林业一张图03.jpg",
+        "/img/林业一张图04.jpg"
+      ],
+      "category": "",
+      "headline": "",
+      "summary": "",
+      "english": {
+        "name": "Hainan Forestry One-Map",
+        "type": "2D Dashboard Project",
+        "description": "A visual analytics platform for integrated forestry-resource supervision in Hainan. It brings together forest resources, public-welfare forests, wetlands, protected areas, mangroves, wildfire prevention, pest control, and connected business-system entry points in one map-centric interface.",
+        "technologies": [
+          "Vue 2",
+          "Element UI",
+          "ECharts",
+          "WebGIS",
+          "Axios"
+        ],
+        "achievements": [
+          "Built the 1920×1080 forestry dashboard with resolution-aware scaling and reusable metric cards, charts, and thematic panels.",
+          "Delivered thematic views and statistical visualizations for forest resources, public-welfare forests, protected areas, mangroves, wildfire prevention, and pest control.",
+          "Integrated the WebGIS map with resource distributions, administrative context, and business indicators to coordinate the central map with surrounding data panels.",
+          "Used JSON configuration and Axios-based loading for dashboard data, menus, and navigation, connecting the data center with multiple forestry business systems while keeping the interface maintainable."
+        ],
+        "category": "",
+        "headline": "",
+        "summary": ""
+      },
+      "featured": false,
+      "sortOrder": 70,
+      "status": "published"
+    }
+  ]
+}

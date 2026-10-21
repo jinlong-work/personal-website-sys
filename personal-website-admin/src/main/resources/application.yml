@@ -19,8 +19,8 @@ spring:
     import: optional:file:./.local/minio.yml
   servlet:
     multipart:
-      max-file-size: 2MB
-      max-request-size: 3MB
+      max-file-size: 10MB
+      max-request-size: 12MB
   application:
     name: personal-website-sys
   profiles:
@@ -60,6 +60,7 @@ app:
       access-key: ${MINIO_ACCESS_KEY:}
       secret-key: ${MINIO_SECRET_KEY:}
       avatar-bucket: ${MINIO_AVATAR_BUCKET:website-avatars}
+      project-bucket: ${MINIO_PROJECT_BUCKET:website-projects}
   auth:
     allowed-origins: ${AUTH_ALLOWED_ORIGINS:}
 

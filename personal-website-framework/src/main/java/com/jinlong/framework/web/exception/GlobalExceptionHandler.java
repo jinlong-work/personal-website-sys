@@ -24,12 +24,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<AjaxResult> handleUploadTooLarge(MaxUploadSizeExceededException exception) {
-        return ResponseEntity.status(413).body(AjaxResult.error(413, "头像图片不能超过2MB"));
+        return ResponseEntity.status(413).body(AjaxResult.error(413, "上传文件不能超过10MB；头像图片最大2MB"));
     }
 
     @ExceptionHandler({MultipartException.class, MissingServletRequestPartException.class})
     public ResponseEntity<AjaxResult> handleInvalidUpload(Exception exception) {
-        return ResponseEntity.badRequest().body(AjaxResult.error(400, "请选择有效的头像图片"));
+        return ResponseEntity.badRequest().body(AjaxResult.error(400, "请选择有效的上传图片"));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

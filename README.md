@@ -22,7 +22,13 @@
 
 脚本不导入若依演示账号和演示菜单。初始 `sys_menu` 为空，因此 `/getRouters` 返回空数组。后台用户管理采用固定三种角色及服务端范围校验，不依赖演示菜单；仍不开放公开注册。
 
-## 用户管理
+## 首页项目管理
+
+新增项目内容、中英文说明、效果图图集、封面、精选展示、排序及发布/下架管理，首页从`GET /public/projects`读取已发布数据。已实际创建项目和图片资源表，将现有8个项目及27张效果图迁入，并配置私有MinIO项目桶`website-projects`。功能、接口、迁移记录及新环境初始化见[项目管理说明](docs/project-management.md)。
+
+项目代码已完成前后端编译检查，未运行测试。启动后台使用JDK25；重启前后端后可进入后台“项目管理”。
+
+## 用户管理接口
 
 新增用户台账、账号维护、密码重置、角色设置与启停接口，见 [用户管理接口与权限](docs/user-management.md)。本人账号资料及密码修改也已接入。
 
@@ -37,6 +43,8 @@
 配置在 `personal-website-admin/src/main/resources`：公共 `application.yml` 与 Git 忽略的本机 `application-dev.yml`。保留现有本机数据库、Redis和密钥配置，默认启用dev。
 
 生产环境设置 `SPRING_PROFILES_ACTIVE=prod`，提供 `SPRING_DATASOURCE_URL`、`SPRING_DATASOURCE_USERNAME`、`SPRING_DATASOURCE_PASSWORD`、`SPRING_DATA_REDIS_HOST`、`SPRING_DATA_REDIS_PORT`、`SPRING_DATA_REDIS_PASSWORD`、`JWT_SECRET` 与 `AUTH_ALLOWED_ORIGINS`。JWT密钥至少64个UTF-8字节。Redis需要允许GET/SET/DEL/EXPIRE及EVAL。验证码消费与密码错误计数使用Lua，兼容Redis 5。
+
+项目图片复用既有MinIO连接，`MINIO_PROJECT_BUCKET`默认为`website-projects`。新环境完成005后执行006项目迁移并初始化内容，详见项目管理说明；Nginx上传限制调整为12m，头像本身仍限制2MiB。
 
 ```powershell
 # 根目录，使用JDK 25；此工程使用本机Maven，不再依赖已删除的mvnw。

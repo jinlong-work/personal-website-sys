@@ -32,11 +32,12 @@ MINIO_ENDPOINT=http://39.105.91.141:9000
 MINIO_ACCESS_KEY=替换为MinIO访问密钥
 MINIO_SECRET_KEY=替换为MinIO密钥
 MINIO_AVATAR_BUCKET=website-avatars
+MINIO_PROJECT_BUCKET=website-projects
 ```
 
 地址应使用容器实际可访问的数据库、Redis和MinIO地址。容器内的127.0.0.1指该容器自身。MinIO填9000的S3 API地址，9001用于控制台；头像桶保持私有，图片由后端返回。JWT密钥应持久保留，同一环境的多个实例需使用相同密钥、签发者和缓存前缀。
 
-新环境先按后端根目录README执行003、004（需要初始化管理员时）、005迁移。现有环境已完成的迁移无需重复初始化账号。
+新环境先按后端根目录README执行003、004（需要初始化管理员时）、005迁移，再按`docs/project-management.md`执行006和项目初始化。当前开发库已迁入8个项目、27张效果图并创建私有`website-projects`桶；现有环境已完成的迁移无需重复初始化。
 
 先校验上传后的JAR，再构建镜像和启动。以下端口映射适用于Nginx运行在宿主机：
 
@@ -53,7 +54,7 @@ docker logs -f personal-website-api
 
 ```nginx
 location /api/ {
-    client_max_body_size 3m;
+    client_max_body_size 12m;
     proxy_pass http://127.0.0.1:8080/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;

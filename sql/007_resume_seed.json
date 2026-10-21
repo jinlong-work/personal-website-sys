@@ -1,0 +1,146 @@
+{
+  "zh": {
+    "basic": {
+      "name": "曹进龙",
+      "latinName": "JINLONG CAO",
+      "title": "WebGIS 开发工程师",
+      "role": "空间可视化探索者",
+      "tagline": "以代码构建，",
+      "taglineAccent": "让空间可见。",
+      "intro": "专注 WebGIS、三维地图与数据可视化。把复杂的空间数据，变成直观、有温度的交互体验。",
+      "about": "毕业于湖北大学地理信息科学专业，持续深耕 WebGIS 前端开发。擅长二维与三维地图、空间可视化，以及复杂业务场景下的交互实现。\n目前系统学习并实践 Java、Spring Boot 与 MyBatis，逐步形成覆盖地图应用、后端服务与空间数据的交付能力。",
+      "hometown": "湖北恩施",
+      "location": "当前驻场海南",
+      "email": "1426559553@qq.com",
+      "phone": "13310539521",
+      "availability": "专注地图，持续探索"
+    },
+    "education": [
+      {
+        "school": "湖北大学",
+        "major": "地理信息科学",
+        "degree": "本科",
+        "start": "",
+        "end": "2023",
+        "description": ""
+      }
+    ],
+    "experience": [
+      {
+        "company": "湖北嘉款科技有限公司",
+        "role": "WebGIS 开发工程师",
+        "start": "2024-11",
+        "end": "",
+        "description": "驻场海南省测绘地理信息局"
+      },
+      {
+        "company": "武汉中地数码科技有限公司",
+        "role": "WebGIS 开发实习生",
+        "start": "2022-07",
+        "end": "2022-09",
+        "description": ""
+      }
+    ],
+    "skills": [
+      {
+        "name": "地图与空间",
+        "items": [
+          "ArcGIS",
+          "Cesium",
+          "OpenLayers"
+        ],
+        "description": ""
+      },
+      {
+        "name": "前端与可视化",
+        "items": [
+          "Vue 3",
+          "ECharts",
+          "Three.js"
+        ],
+        "description": ""
+      },
+      {
+        "name": "后端与工程化 · 持续学习",
+        "items": [
+          "Java",
+          "Spring Boot",
+          "MyBatis"
+        ],
+        "description": ""
+      }
+    ]
+  },
+  "en": {
+    "basic": {
+      "name": "Jinlong Cao",
+      "latinName": "JINLONG CAO",
+      "title": "WebGIS Developer",
+      "role": "Spatial explorer",
+      "tagline": "Built with code. ",
+      "taglineAccent": "Rooted in space.",
+      "intro": "I build WebGIS applications, 3D maps and data visualizations, turning complex spatial data into clear, thoughtful experiences.",
+      "about": "A Geographic Information Science graduate of Hubei University, focused on WebGIS frontend development, 2D and 3D maps, spatial visualization and complex business interactions.\nCurrently learning and applying Java, Spring Boot and MyBatis to deliver solutions spanning map applications, backend services and spatial data.",
+      "hometown": "Enshi, Hubei",
+      "location": "Working in Hainan",
+      "email": "1426559553@qq.com",
+      "phone": "13310539521",
+      "availability": "Focused on maps. Always exploring."
+    },
+    "education": [
+      {
+        "school": "Hubei University",
+        "major": "Geographic Information Science",
+        "degree": "BSc",
+        "start": "",
+        "end": "2023",
+        "description": ""
+      }
+    ],
+    "experience": [
+      {
+        "company": "Hubei Jiakuan Technology Co., Ltd.",
+        "role": "WebGIS Developer",
+        "start": "2024-11",
+        "end": "",
+        "description": "On site at Hainan Bureau of Surveying and Geoinformation"
+      },
+      {
+        "company": "Wuhan Zhongdi Digital Technology Co., Ltd.",
+        "role": "WebGIS Development Intern",
+        "start": "2022-07",
+        "end": "2022-09",
+        "description": ""
+      }
+    ],
+    "skills": [
+      {
+        "name": "Maps & spatial data",
+        "items": [
+          "ArcGIS",
+          "Cesium",
+          "OpenLayers"
+        ],
+        "description": ""
+      },
+      {
+        "name": "Frontend & visualization",
+        "items": [
+          "Vue 3",
+          "ECharts",
+          "Three.js"
+        ],
+        "description": ""
+      },
+      {
+        "name": "Backend & engineering · Learning",
+        "items": [
+          "Java",
+          "Spring Boot",
+          "MyBatis"
+        ],
+        "description": ""
+      }
+    ]
+  }
+}

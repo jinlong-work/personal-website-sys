@@ -68,6 +68,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/captchaImage").permitAll()
                         .requestMatchers(HttpMethod.GET, "/files/avatars/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/public/projects", "/public/resume", "/files/projects/*").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/public/location/city").permitAll()
                         .anyRequest().authenticated())
                 .logout(logout -> logout.logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/logout"))
                         .logoutSuccessHandler((request, response, authentication) -> {
