@@ -61,6 +61,7 @@ app:
       secret-key: ${MINIO_SECRET_KEY:}
       avatar-bucket: ${MINIO_AVATAR_BUCKET:website-avatars}
       project-bucket: ${MINIO_PROJECT_BUCKET:website-projects}
+      ielts-audio-bucket: ${MINIO_IELTS_AUDIO_BUCKET:website-ielts-audio}
   auth:
     allowed-origins: ${AUTH_ALLOWED_ORIGINS:}
 
