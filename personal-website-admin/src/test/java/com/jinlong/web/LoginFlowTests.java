@@ -6,13 +6,17 @@ import com.jinlong.common.core.domain.model.LoginUser;
 import com.jinlong.common.core.redis.RedisCache;
 import com.jinlong.framework.web.service.TokenService;
 import com.jinlong.system.domain.SysConfig;
+import com.jinlong.system.domain.english.IeltsStudyProgress.Progress;
+import com.jinlong.system.domain.english.IeltsStudyProgress.Rating;
 import com.jinlong.system.mapper.SysConfigMapper;
 import com.jinlong.system.mapper.SysLogininforMapper;
 import com.jinlong.system.mapper.SysMenuMapper;
 import com.jinlong.system.mapper.SysUserMapper;
+import com.jinlong.system.service.EnglishStudyService;
 import com.jinlong.web.service.MinioAvatarStore;
 import org.springframework.mock.web.MockMultipartFile;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +64,7 @@ class LoginFlowTests {
     @MockitoBean RedisCache cache;
     @MockitoBean StringRedisTemplate redis;
     @MockitoBean MinioAvatarStore avatarStore;
+    @MockitoBean EnglishStudyService englishStudy;
     private final JdkSerializationRedisSerializer serializer = new JdkSerializationRedisSerializer();
     private final Map<String, byte[]> cached = new HashMap<>();
     private final Map<String, Integer> failures = new HashMap<>();
@@ -106,6 +111,30 @@ class LoginFlowTests {
     }
 
     private Object deserialize(String key) { return serializer.deserialize(cached.get(key)); }
+
+    @Test
+    void englishStudyUsesTheAuthenticatedAccountForReadingAndSavingProgress() throws Exception {
+        String path = "/english/study/words/31";
+        String action = """
+                {"rating":"SEEN","version":0,"userId":99}
+                """;
+        mvc.perform(get("/english/study/progress")).andExpect(status().isUnauthorized());
+        mvc.perform(put(path).contentType("application/json").content(action)).andExpect(status().isUnauthorized());
+        verifyNoInteractions(englishStudy);
+
+        String token = "Bearer " + login();
+        OffsetDateTime now = OffsetDateTime.parse("2026-11-25T08:00:00+08:00");
+        Progress entry = new Progress(31, 2, now, now, 0, "SEEN", 1);
+        when(englishStudy.record(1L, 31L, Rating.SEEN, 0)).thenReturn(entry);
+        when(englishStudy.listProgress(1L)).thenReturn(List.of(entry));
+        mvc.perform(put(path).header("Authorization", token).contentType("application/json").content(action))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data.version").value(1));
+        mvc.perform(get("/english/study/progress").header("Authorization", token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.data[0].wordId").value(31));
+        verify(englishStudy).record(1L, 31L, Rating.SEEN, 0);
+        verify(englishStudy).listProgress(1L);
+    }
+
     private void captcha() { cached.put("login-test:captcha_codes:" + UUID, serializer.serialize("6")); }
     private String body(String username, String password, String code) {
         return json.writeValueAsString(Map.of("username", username, "password", password, "code", code, "uuid", UUID));
